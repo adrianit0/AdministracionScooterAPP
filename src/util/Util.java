@@ -5,13 +5,22 @@
  */
 package util;
 
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- *
- * 
- * 
  * @author adrian
  */
 public class Util {
+    
+    private static final String hostServerName = "localhost";
+    private static final int servicePort = 4445;
     
     /**
      * Convierte codigos dificiles de enviar por letras distinguibles.
@@ -25,14 +34,11 @@ public class Util {
     public enum CODIGO {
         // 0 - 99. Juego
         desconocido             (-1),
-        seguirJugando           (0),
-        hasGanado               (1),
-        gameOver                (2),
         error                   (3),
-        salirDelJuego           (9),
-        
-        preguntarJugar          (24),
         ponerMenu               (30),
+        
+        // 200 - 299. Mensajes de confirmación (Status OK)
+        ok                      (200),
         
         // 400 - 449. Errores del cliente
         forbidden               (403),  // Intentar acceder sin tener privilegios necesarios
@@ -93,26 +99,92 @@ public class Util {
     };
 
     private static final String separator = ";";
+    private static final String separatorArgs = "[:]";
+    private static final ENCRIPTADOR encriptacion = ENCRIPTADOR.plain;
     
     /**
-     * Convierte el texto del servidor a una sola linea
+     * Convierte una cadena de texto en un paquete 
+     * 
+     * TODO: Convertir el paquete en un DTO
      */
-    public static String encode (CODIGO code) {
-        return encriptar(ENCRIPTADOR.plain, code.getCodigo()+"");
+    public static Paquete unpack (String cadena) {
+        String[] decoded = decode(cadena);
+        
+        if (decoded==null || decoded.length<3) {
+            System.err.println("Error Util::unpack: El paquete no se ha formado correctamente.");
+            //throw new Exception();
+            return null;
+        }
+        
+        // Extraemos el contenido del paquete
+        CODIGO cod = CODIGO.fromCode(decoded[0]);
+        String nick = decoded[1];
+        String token = decoded[2];
+        String uri = decoded[3];
+        Map<String,String> parametros = new HashMap<>();
+        if (decoded.length>=4) {
+            for (int i = 4; i < decoded.length; i++) {
+                String[] type = decoded[i].split(separatorArgs);
+                if (type.length<2) {
+                    // NO ES UN ARGUMENTO.
+                    // TODO: devolver correctamente el mensaje de error
+                    System.err.println("La variable " + decoded[i] + " no es un parametro");
+                    continue;
+                }
+                parametros.put(type[0], type[1]);
+            }
+        }
+        
+        // Lo almacenamos en un objeto de tipo Paquete
+        Paquete pack = new Paquete();
+        pack.setCodigo(cod);
+        pack.setNick(nick);
+        pack.setToken(token);
+        pack.setUri(uri);
+        pack.setArgumentos(parametros);
+        
+        // Lo devolvemos
+        return pack;
+    }
+    
+    /**
+     * Convierte un paquete en un String.
+     * 
+     * TODO: Convertir el paquete en un DTO
+     */
+    public static String pack (Paquete paquete) {
+        String parametros = "";
+        for (Map.Entry<String, String> entry : paquete.getArgumentos().entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            
+            parametros += key + ":" + value +";";
+        }
+        
+        String encoded = encode (paquete.getCodigo(), paquete.getNick(), paquete.getToken(), paquete.getUri(), parametros);
+        
+        return encoded;
     }
     
     /**
      * Convierte el texto del servidor a una sola linea
      */
-    public static String encode (CODIGO code, String... contenido) {
-        return encriptar(ENCRIPTADOR.plain, code.getCodigo()+separator+String.join(separator, contenido));
+    private static String encode (CODIGO code) {
+        return encriptar(encriptacion, code.getCodigo()+"");
+    }
+    
+    /**
+     * Convierte el texto del servidor a una sola linea
+     */
+    private static String encode (CODIGO code, String... contenido) {
+        return encriptar(encriptacion, code.getCodigo()+separator+String.join(separator, contenido));
     }
     
     /**
      * Desencripta el contenido de la cadena en un array de String
      */
-    public static String[] decode (String cadena) {
-        return desencriptar(ENCRIPTADOR.plain,cadena).replace("\0","").split(separator);
+    private static String[] decode (String cadena) {
+        return desencriptar(encriptacion,cadena).replace("\0","").split(separator);
     }
     
     /**
@@ -134,6 +206,96 @@ public class Util {
      */
     private static String desencriptar (ENCRIPTADOR cod, String texto) {
         return texto;
+    }
+    
+    public static boolean enviarPaqueteUDP (Paquete paqueteEnviar, CallbackRespuesta response) {
+        DatagramSocket socket;
+        Paquete paqueteRecibir = null;
+        try {
+            socket = new DatagramSocket();
+
+            InetAddress address = InetAddress.getByName(hostServerName);
+
+            String textoEnviar = Util.pack(paqueteEnviar);
+            byte[] buf = textoEnviar.getBytes();
+            DatagramPacket packetToSend = new DatagramPacket(buf, buf.length, address, servicePort);
+
+            socket.send(packetToSend);
+
+            byte[] recibir = new byte[1024];
+            DatagramPacket packetToReceive = new DatagramPacket(recibir, recibir.length);
+
+            socket.receive(packetToReceive);
+            String received = new String(packetToReceive.getData(), 0, packetToReceive.getLength());
+            paqueteRecibir = Util.unpack(received);
+
+            socket.close();
+            CODIGO cod = paqueteRecibir.getCodigo();
+            if (cod==CODIGO.error || cod.getCodigo()>=400) {
+                response.error(paqueteRecibir==null?null:paqueteRecibir.getArgumentos());
+                return false;
+            }
+            
+            response.success(paqueteRecibir.getArgumentos());
+            return true;
+        } catch (SocketException | UnknownHostException ex) {
+            System.out.println("Error: " + ex.getMessage());
+        } catch (IOException ex) {
+            System.out.println("Error: " + ex.getMessage());
+        }
+
+        response.error(paqueteRecibir==null?null:paqueteRecibir.getArgumentos());
+        return false;
+    }
+    
+    /**
+     * Envia un texto UDP al servidor y devuelve su respuesta.
+     * 
+     * @deprecated use {@link #enviarPaqueteUDP()} instead.
+     */
+    @Deprecated
+    public static String enviarTextoUDP(String textoEnviar) {
+        DatagramSocket socket;
+        try {
+            socket = new DatagramSocket();
+
+            InetAddress address = InetAddress.getByName(hostServerName);
+
+            
+            byte[] buf = textoEnviar.getBytes();
+            DatagramPacket packetToSend = new DatagramPacket(buf, buf.length, address, 4445);
+
+            socket.send(packetToSend);
+
+            byte[] recibir = new byte[1024];
+            DatagramPacket packetToReceive = new DatagramPacket(recibir, recibir.length);
+
+            socket.receive(packetToReceive);
+
+            String received = new String(packetToReceive.getData(), 0, packetToReceive.getLength());
+
+            socket.close();
+
+            return received;
+        } catch (SocketException | UnknownHostException ex) {
+            System.out.println("Error: " + ex.getMessage());
+        } catch (IOException ex) {
+            System.out.println("Error: " + ex.getMessage());
+        }
+
+        return "";
+    }
+
+    /**
+     * Comprueba que la sesión ha expirado
+     */
+    public static boolean seguirConectado(CODIGO cod) {
+        Boolean logout = cod == CODIGO.sessionExpired;
+        if (logout) {
+            System.out.println("ERROR 440: La sesión ha expirado.");
+        }
+        
+        return logout;
     }
     
     // Mejoraría cambiar el cifrado
