@@ -41,11 +41,11 @@ public class Principal extends javax.swing.JFrame {
 
         jPanel5 = new javax.swing.JPanel();
         campoEmail = new javax.swing.JTextField();
-        campoPass = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         botonConectar = new javax.swing.JButton();
+        campoPass = new javax.swing.JPasswordField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -54,12 +54,6 @@ public class Principal extends javax.swing.JFrame {
         campoEmail.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 campoEmailActionPerformed(evt);
-            }
-        });
-
-        campoPass.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                campoPassActionPerformed(evt);
             }
         });
 
@@ -78,6 +72,12 @@ public class Principal extends javax.swing.JFrame {
             }
         });
 
+        campoPass.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                campoPassActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
         jPanel5.setLayout(jPanel5Layout);
         jPanel5Layout.setHorizontalGroup(
@@ -89,11 +89,11 @@ public class Principal extends javax.swing.JFrame {
                         .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 277, Short.MAX_VALUE))
                     .addGroup(jPanel5Layout.createSequentialGroup()
                         .addGap(50, 50, 50)
-                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(jPanel5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jLabel3)
                             .addComponent(jLabel2)
-                            .addComponent(campoPass, javax.swing.GroupLayout.PREFERRED_SIZE, 197, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(campoEmail, javax.swing.GroupLayout.PREFERRED_SIZE, 197, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(campoEmail, javax.swing.GroupLayout.DEFAULT_SIZE, 197, Short.MAX_VALUE)
+                            .addComponent(campoPass))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
             .addGroup(jPanel5Layout.createSequentialGroup()
@@ -137,13 +137,13 @@ public class Principal extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_campoEmailActionPerformed
 
-    private void campoPassActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_campoPassActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_campoPassActionPerformed
-
     private void botonConectarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonConectarActionPerformed
         conectar();
     }//GEN-LAST:event_botonConectarActionPerformed
+
+    private void campoPassActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_campoPassActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_campoPassActionPerformed
 
     private void conectar () {
         Map<String,String> parametros = new HashMap<String,String>();
@@ -165,22 +165,20 @@ public class Principal extends javax.swing.JFrame {
         Util.enviarPaqueteUDP(paqueteEnviar, new CallbackRespuesta() {
             @Override
             public void success(Map<String,String> contenido) {
-                entrarDentro();
+                entrarDentro(contenido.get("token"), contenido.get("email"));
             }
 
             @Override
             public void error(Map<String,String> contenido) {
-                //JOptionPane.showMessageDialog(frame, "Error: " + contenido.get("error")); 
-                entrarDentro();
+                JOptionPane.showMessageDialog(frame, "Error: " + contenido.get("error")); 
                 botonConectar.setEnabled(true);
             }
-            
         });
     }
     
-    private void entrarDentro () {
-        System.out.println("SUCCESS!");
-        PaneEdiccion ediccion = new PaneEdiccion(this);
+    private void entrarDentro (String token, String nick) {
+        //System.out.println("SUCCESS!");
+        PaneEdiccion ediccion = new PaneEdiccion(this, token, nick);
         ediccion.setVisible(true);
         this.setVisible(false);
     }
@@ -228,7 +226,7 @@ public class Principal extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton botonConectar;
     private javax.swing.JTextField campoEmail;
-    private javax.swing.JTextField campoPass;
+    private javax.swing.JPasswordField campoPass;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

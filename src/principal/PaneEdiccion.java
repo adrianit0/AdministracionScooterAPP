@@ -5,10 +5,19 @@
  */
 package principal;
 
+import entidades.Empleado;
 import java.awt.Frame;
 import java.awt.MouseInfo;
 import java.awt.Point;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import util.CallbackRespuesta;
+import util.Paquete;
 
 /**
  *
@@ -21,11 +30,19 @@ public class PaneEdiccion extends javax.swing.JFrame {
     private Point start;
     
     private Principal parent;
+    private String token;
+    private String nick;
+    
+    private Map<Integer,Empleado> empleados;
+    
+    private List<JPanel> paneles;
+    
+    private javax.swing.JFrame frame;
     
     /**
      * Creates new form PaneEdiccion
      */
-    public PaneEdiccion(Principal parent) {
+    public PaneEdiccion(Principal parent, String nick, String token) {
         this.setUndecorated(true);
         
         initComponents();
@@ -35,6 +52,17 @@ public class PaneEdiccion extends javax.swing.JFrame {
         this.setLocationRelativeTo(null);
         
         this.parent = parent;
+        this.nick = nick;
+        this.token = token;
+        this.frame = this;
+        
+        // Paneles para cambiar, tiene que estar en el mismo orden que se encuentre en la interfaz
+        paneles = new ArrayList<JPanel>();
+        paneles.add (panelInicio);
+        paneles.add(panelEmpleado);
+        
+        
+        
     }
 
     /**
@@ -46,24 +74,55 @@ public class PaneEdiccion extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tablaFacturas = new javax.swing.JTable();
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
+        botonInicio = new javax.swing.JButton();
+        botonEmpleado = new javax.swing.JButton();
+        botonScooter = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
-        jButton5 = new javax.swing.JButton();
+        botonBonos = new javax.swing.JButton();
         panelBarra = new javax.swing.JPanel();
         jToggleButton1 = new javax.swing.JToggleButton();
         jToggleButton2 = new javax.swing.JToggleButton();
         jLabel5 = new javax.swing.JLabel();
-        jPanel4 = new javax.swing.JPanel();
+        panelInicio = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
         jLabel4 = new javax.swing.JLabel();
         jPanel5 = new javax.swing.JPanel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
+        panelEmpleado = new javax.swing.JPanel();
+        jLabel8 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        tablaFacturas1 = new javax.swing.JTable();
+
+        tablaFacturas.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "ID", "Nombre", "Fecha"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane1.setViewportView(tablaFacturas);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setPreferredSize(new java.awt.Dimension(715, 485));
@@ -83,32 +142,32 @@ public class PaneEdiccion extends javax.swing.JFrame {
         });
         jPanel2.add(jButton1, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 380, 160, 30));
 
-        jButton2.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jButton2.setText("Inicio");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        botonInicio.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        botonInicio.setText("Inicio");
+        botonInicio.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                botonInicioActionPerformed(evt);
             }
         });
-        jPanel2.add(jButton2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 20, 160, 30));
+        jPanel2.add(botonInicio, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 20, 160, 30));
 
-        jButton3.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jButton3.setText("Empleado");
-        jButton3.addActionListener(new java.awt.event.ActionListener() {
+        botonEmpleado.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        botonEmpleado.setText("Empleado");
+        botonEmpleado.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton3ActionPerformed(evt);
+                botonEmpleadoActionPerformed(evt);
             }
         });
-        jPanel2.add(jButton3, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 50, 160, 30));
+        jPanel2.add(botonEmpleado, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 50, 160, 30));
 
-        jButton4.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jButton4.setText("Scooter");
-        jButton4.addActionListener(new java.awt.event.ActionListener() {
+        botonScooter.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        botonScooter.setText("Scooter");
+        botonScooter.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton4ActionPerformed(evt);
+                botonScooterActionPerformed(evt);
             }
         });
-        jPanel2.add(jButton4, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 80, 160, 30));
+        jPanel2.add(botonScooter, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 80, 160, 30));
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 10)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(255, 255, 255));
@@ -116,14 +175,14 @@ public class PaneEdiccion extends javax.swing.JFrame {
         jLabel1.setText("Versión Semana 5");
         jPanel2.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 410, 140, 40));
 
-        jButton5.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        jButton5.setText("Bonos");
-        jButton5.addActionListener(new java.awt.event.ActionListener() {
+        botonBonos.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        botonBonos.setText("Bonos");
+        botonBonos.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton5ActionPerformed(evt);
+                botonBonosActionPerformed(evt);
             }
         });
-        jPanel2.add(jButton5, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 110, 160, 30));
+        jPanel2.add(botonBonos, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 110, 160, 30));
 
         jPanel1.add(jPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 35, 160, 450));
 
@@ -175,7 +234,7 @@ public class PaneEdiccion extends javax.swing.JFrame {
 
         jPanel1.add(panelBarra, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 0, 716, -1));
 
-        jPanel4.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+        panelInicio.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
         jPanel3.setBackground(new java.awt.Color(255, 255, 255));
         jPanel3.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
@@ -200,7 +259,7 @@ public class PaneEdiccion extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        jPanel4.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 120, -1, 310));
+        panelInicio.add(jPanel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 120, -1, 310));
 
         jPanel5.setBackground(new java.awt.Color(255, 255, 255));
         jPanel5.setBorder(javax.swing.BorderFactory.createMatteBorder(0, 8, 0, 0, new java.awt.Color(255, 153, 0)));
@@ -221,13 +280,55 @@ public class PaneEdiccion extends javax.swing.JFrame {
             .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 40, Short.MAX_VALUE)
         );
 
-        jPanel4.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, 360, 40));
+        panelInicio.add(jPanel5, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 20, 360, 40));
 
         jLabel3.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
         jLabel3.setText("Inicio");
-        jPanel4.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, -1, -1));
+        panelInicio.add(jLabel3, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 80, -1, -1));
 
-        jPanel1.add(jPanel4, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 40, 555, 445));
+        jPanel1.add(panelInicio, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 40, 555, 445));
+
+        panelEmpleado.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        jLabel8.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
+        jLabel8.setText("Empleados");
+        panelEmpleado.add(jLabel8, new org.netbeans.lib.awtextra.AbsoluteConstraints(20, 20, -1, -1));
+
+        tablaFacturas1.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "ID", "Nombre", "Puesto", "Direccion"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane2.setViewportView(tablaFacturas1);
+        if (tablaFacturas1.getColumnModel().getColumnCount() > 0) {
+            tablaFacturas1.getColumnModel().getColumn(0).setResizable(false);
+            tablaFacturas1.getColumnModel().getColumn(0).setPreferredWidth(5);
+            tablaFacturas1.getColumnModel().getColumn(1).setResizable(false);
+            tablaFacturas1.getColumnModel().getColumn(2).setResizable(false);
+            tablaFacturas1.getColumnModel().getColumn(3).setResizable(false);
+        }
+
+        panelEmpleado.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 70, 540, 290));
+
+        jPanel1.add(panelEmpleado, new org.netbeans.lib.awtextra.AbsoluteConstraints(160, 40, 555, 445));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -275,41 +376,95 @@ public class PaneEdiccion extends javax.swing.JFrame {
         start = MouseInfo.getPointerInfo().getLocation();
     }//GEN-LAST:event_panelBarraMousePressed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton2ActionPerformed
+    private void botonInicioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonInicioActionPerformed
+        botonInicio();
+    }//GEN-LAST:event_botonInicioActionPerformed
 
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton3ActionPerformed
+    private void botonEmpleadoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonEmpleadoActionPerformed
+        botonEmpleado();
+    }//GEN-LAST:event_botonEmpleadoActionPerformed
 
-    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton4ActionPerformed
+    private void botonScooterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonScooterActionPerformed
+        botonScooter();
+    }//GEN-LAST:event_botonScooterActionPerformed
 
-    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton5ActionPerformed
+    private void botonBonosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonBonosActionPerformed
+        botonBonos();
+    }//GEN-LAST:event_botonBonosActionPerformed
 
+    private void botonInicio() {
+        changeTab(0);
+    }
+    
+    private void botonEmpleado(){
+        changeTab(1);
+        
+        if (empleados==null) {
+            empleados = new HashMap<Integer,Empleado>();
+            
+            Paquete paquete = new Paquete();
+            paquete.setToken(token);
+            paquete.setNick(nick);
+            //paquete.setUri();
+            util.Util.enviarPaqueteUDP(paquete, new CallbackRespuesta () {
+                @Override
+                public void success(Map<String, String> contenido) {
+                    
+                }
 
+                @Override
+                public void error(Map<String, String> contenido) {
+                    JOptionPane.showMessageDialog(frame, "Error: " + contenido.get("error")); 
+                    empleados = null;
+                }
+                
+            });
+        }
+    }
+    
+    private void botonScooter() {
+        changeTab(2);
+    }
+    
+    private void botonBonos () {
+        changeTab(3);
+    }
+    
+    private void changeTab (int pos) {
+        if (pos<0|| pos>=paneles.size())
+            return;
+        
+        for (JPanel p : paneles) {
+            p.setVisible(false);
+        }
+        paneles.get(pos).setVisible(true);
+    }
+        
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton botonBonos;
+    private javax.swing.JButton botonEmpleado;
+    private javax.swing.JButton botonInicio;
+    private javax.swing.JButton botonScooter;
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
-    private javax.swing.JButton jButton5;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel8;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
-    private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JToggleButton jToggleButton1;
     private javax.swing.JToggleButton jToggleButton2;
     private javax.swing.JPanel panelBarra;
+    private javax.swing.JPanel panelEmpleado;
+    private javax.swing.JPanel panelInicio;
+    private javax.swing.JTable tablaFacturas;
+    private javax.swing.JTable tablaFacturas1;
     // End of variables declaration//GEN-END:variables
 }
