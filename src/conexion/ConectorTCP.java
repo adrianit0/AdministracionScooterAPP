@@ -49,6 +49,10 @@ public class ConectorTCP {
     private final String hostServerName="localhost";
     private final int port = 4444;
     
+    // Test values
+    private String outMessage;
+    private String inMessage;
+    
     private ConectorTCP() {
         paqueteId=10;
         peticiones = new ArrayList<>();
@@ -83,15 +87,23 @@ public class ConectorTCP {
     }
     
     public void realizarConexion (String uri, Map<String,String> parametros, CallbackRespuesta response) {
+        realizarConexion(nick,token,uri,getPaqueteID(),parametros,response);
+    }
+
+    // Para tests
+    public void realizarConexion (String nick, String token, String uri, String paqueteid, Map<String,String> parametros, CallbackRespuesta response) {
         if (!conectado) {
             if (!iniciar ()) {
-                throw new RuntimeException ("No se ha podido realizar la conexión");
+                RuntimeException e = new RuntimeException ("No se ha podido realizar la conexión");
+                parametros.put("error", e.getMessage());
+                response.error(parametros, Util.CODIGO.notConnection);
+                throw e;
             }
         }
             
         // Ponemos los valores para realizar la conexión
         PaqueteServidor paquete = new PaqueteServidor();
-        paquete.setIdPaquete(getPaqueteID());
+        paquete.setIdPaquete(paqueteid);
         paquete.setNick(nick);
         paquete.setToken(token);
         paquete.setArgumentos(parametros);
@@ -138,6 +150,16 @@ public class ConectorTCP {
     public void setToken(String token) {
         this.token = token;
     }
+
+    public String getOutMessage() {
+        return outMessage;
+    }
+
+    public String getInMessage() {
+        return inMessage;
+    }
+    
+    
     
     /**
      ==========================================================
@@ -165,6 +187,8 @@ public class ConectorTCP {
             try  {
                  // Como primer valor le enviamos el nombre y nº de jugadores al servidor
                 String request = Util.packFromServer(paquete);
+                
+                outMessage = request;
 
                 // Le envio la info al servidor
                 out.println(request);
@@ -172,6 +196,8 @@ public class ConectorTCP {
                 try {
                     // Leo la respuesta del servidor
                     String respuesta = in.readLine();
+                    
+                    inMessage = respuesta;
 
                     // Muestro la respuesta sin procesar (Solo para debug)
                     //System.out.println("Respuesta: "+respuesta);
@@ -218,9 +244,12 @@ public class ConectorTCP {
                 if (!this.isInterrupted())  {
                     System.out.println("TIME OUT");
                     con.interrupt();
+                    in.close();
                 }
             } catch (InterruptedException ex) {
                 System.out.println("ERROR: " + ex.getMessage());
+            } catch (IOException ex) {
+                throw new RuntimeException("No se ha podido finalizar", ex);
             }
         }
     }
