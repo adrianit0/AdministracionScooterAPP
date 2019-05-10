@@ -84,7 +84,7 @@ public class AdministracionServerConnector {
         paqueteEnviar.setUri("login");
         paqueteEnviar.setArgumentos(parametros);
         
-        Util.enviarPaqueteUDP(paqueteEnviar, new CallbackRespuesta() {
+        /*Util.enviarPaqueteUDP(paqueteEnviar, new CallbackRespuesta() {
             @Override
             public void success(Map<String,String> contenido) {
                 System.out.println("EXITO");
@@ -103,7 +103,7 @@ public class AdministracionServerConnector {
                 System.out.println("ERROR: " + contenido.get("error"));
             }
             
-        });
+        });*/
         
         
     }

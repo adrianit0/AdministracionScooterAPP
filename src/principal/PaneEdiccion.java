@@ -5,6 +5,7 @@
  */
 package principal;
 
+import conexion.ConectorTCP;
 import entidades.Empleado;
 import java.awt.Frame;
 import java.awt.MouseInfo;
@@ -18,6 +19,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import util.CallbackRespuesta;
 import util.Paquete;
+import util.Util;
 
 /**
  *
@@ -402,18 +404,14 @@ public class PaneEdiccion extends javax.swing.JFrame {
         if (empleados==null) {
             empleados = new HashMap<Integer,Empleado>();
             
-            Paquete paquete = new Paquete();
-            paquete.setToken(token);
-            paquete.setNick(nick);
-            //paquete.setUri();
-            util.Util.enviarPaqueteUDP(paquete, new CallbackRespuesta () {
+            ConectorTCP.getInstance().realizarConexion("getEmpleados", null, new CallbackRespuesta () {
                 @Override
                 public void success(Map<String, String> contenido) {
                     
                 }
 
                 @Override
-                public void error(Map<String, String> contenido) {
+                public void error(Map<String, String> contenido, Util.CODIGO codigoError) {
                     JOptionPane.showMessageDialog(frame, "Error: " + contenido.get("error")); 
                     empleados = null;
                 }
