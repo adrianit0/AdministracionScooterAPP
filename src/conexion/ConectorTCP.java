@@ -119,6 +119,18 @@ public class ConectorTCP {
         }
     }
     
+    public void realizarConexion (String trama, CallbackRespuesta response) {
+        PaqueteServidor paquete = Util.unpackToServer(trama);
+        
+        if (realizandoConexion) {
+            peticiones.add(paquete);
+        } else {
+            //realizar conexión
+            RealizarConexion conexion = new RealizarConexion (paquete);
+            conexion.start();
+        }
+    }
+    
     public synchronized void nextQuery () {
         if (peticiones.size()>0) {
             RealizarConexion conexion = new RealizarConexion (peticiones.remove(0));
