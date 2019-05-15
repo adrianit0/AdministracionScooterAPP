@@ -45,7 +45,7 @@ public class ConectorTCP {
     // Singleton
     private static ConectorTCP instance;
     
-    private final long TIMEOUT = 30000;
+    private final long TIMEOUT = 1000;
     private final String hostServerName="localhost";
     private final int port = 4444;
     
