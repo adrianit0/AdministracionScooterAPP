@@ -203,9 +203,11 @@ public class Util {
         cadena = convertirObjetos(cadena, pack);
         String[] decoded = decode(cadena);
         
-        if (decoded==null || decoded.length<3) {
+        if (decoded==null || decoded.length<2) {
             System.err.println("Error Util::unpack: El paquete no se ha formado correctamente.");
             //throw new Exception();
+            
+            // Devolver un paquete con error Paquete mal formado
             return null;
         }
         

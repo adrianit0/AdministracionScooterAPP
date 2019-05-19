@@ -77,6 +77,7 @@ public class TestConection extends javax.swing.JFrame {
         campoParametrosValue = new javax.swing.JTextArea();
         botonEjecutarTrama = new javax.swing.JToggleButton();
         botonTestRegistrar = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -231,6 +232,13 @@ public class TestConection extends javax.swing.JFrame {
             }
         });
 
+        jButton3.setText("Test GetScooters");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -265,7 +273,6 @@ public class TestConection extends javax.swing.JFrame {
                             .addComponent(jLabel5)
                             .addGap(18, 18, 18)
                             .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 601, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addComponent(respuestaError, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 334, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 686, Short.MAX_VALUE)
                         .addGroup(layout.createSequentialGroup()
                             .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 333, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -281,31 +288,31 @@ public class TestConection extends javax.swing.JFrame {
                                 .addComponent(jLabel7))
                             .addGap(18, 18, 18)
                             .addComponent(jLabel8))
-                        .addComponent(jScrollPane1))
+                        .addComponent(jScrollPane1)
+                        .addComponent(respuestaError, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 334, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 686, Short.MAX_VALUE)
                         .addComponent(tramaVuelta, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 686, Short.MAX_VALUE)
-                        .addComponent(tramaIda, javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 686, Short.MAX_VALUE)))
+                        .addComponent(tramaIda, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 686, Short.MAX_VALUE)))
                 .addGap(18, 18, 18)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(botonEjecutarTrama, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                .addComponent(jLabel13)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(jButton1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(jLabel15, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addComponent(botonEjecutar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE)
-                                    .addComponent(campoTimeOut, javax.swing.GroupLayout.Alignment.TRAILING)))
-                            .addComponent(jButton2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(botonTestRegistrar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(jLabel13)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(botonEjecutar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE)
+                                .addComponent(campoTimeOut, javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addComponent(jLabel15, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 138, Short.MAX_VALUE))))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(botonEjecutarTrama, javax.swing.GroupLayout.PREFERRED_SIZE, 138, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 4, Short.MAX_VALUE))
+                    .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButton2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(botonTestRegistrar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -321,6 +328,8 @@ public class TestConection extends javax.swing.JFrame {
                         .addComponent(botonTestRegistrar)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jButton2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jLabel13)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -425,13 +434,18 @@ public class TestConection extends javax.swing.JFrame {
                 
                 //Prueba texto
                 String respuestaKeys = "";
-                String respuestaValues = "";
                 for (Map.Entry<String, String> entry : contenido.entrySet()) {
                     String key = entry.getKey();
                     String value = entry.getValue();
 
                     respuestaKeys += key + ":" + value + "\n";
                     //respuestaValues += value + "\n";
+                    
+                    if (key.equals("token")) {
+                        campoToken.setText(value);
+                    } else if(key.equals("nick")) {
+                        campoNick.setText(value);
+                    }
                 }
 
                 respuestaCuerpoKeys.setText(respuestaKeys);
@@ -483,18 +497,14 @@ public class TestConection extends javax.swing.JFrame {
     }//GEN-LAST:event_botonEjecutarActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        campoPaqueteID.setText("0");
-        campoNick.setText("1");
-        campoToken.setText("2");
+        cambiarTextosBasicos ();
         campoURI.setText("login");
         campoParametrosKey.setText("nick\npass");
-        campoParametrosValue.setText("jose\n1234");
+        campoParametrosValue.setText("j\nj");
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        campoPaqueteID.setText("0");
-        campoNick.setText("1");
-        campoToken.setText("2");
+        cambiarTextosBasicos ();
         campoURI.setText("echo");
         campoParametrosKey.setText("nick\nscooter");
         campoParametrosValue.setText("adri\n{id:1;modelo:{id:15;nombre:fiat}}");
@@ -505,9 +515,7 @@ public class TestConection extends javax.swing.JFrame {
     }//GEN-LAST:event_botonEjecutarTramaActionPerformed
 
     private void botonTestRegistrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonTestRegistrarActionPerformed
-        campoPaqueteID.setText("0");
-        campoNick.setText("1");
-        campoToken.setText("2");
+        cambiarTextosBasicos ();
         campoURI.setText("register");
         campoParametrosKey.setText("nick\n" +
 "pass\n" +
@@ -524,9 +532,29 @@ public class TestConection extends javax.swing.JFrame {
     }//GEN-LAST:event_botonTestRegistrarActionPerformed
 
     private void respuestaCuerpoKeysPropertyChange(java.beans.PropertyChangeEvent evt) {//GEN-FIRST:event_respuestaCuerpoKeysPropertyChange
-
+        
     }//GEN-LAST:event_respuestaCuerpoKeysPropertyChange
 
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        cambiarTextosBasicos ();
+        campoURI.setText("getScooters");
+        campoParametrosKey.setText("lat\nlon");
+        campoParametrosValue.setText("1\n1");
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void cambiarTextosBasicos () {
+        campoPaqueteID.setText ((Math.random()+"").hashCode()+"");
+        String nick = campoNick.getText();
+        String token = campoToken.getText();
+        
+        if (nick==null || nick.isEmpty()) 
+            campoNick.setText("0");
+        
+        if (token==null || token.isEmpty())
+            campoToken.setText("null");
+        
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -575,6 +603,7 @@ public class TestConection extends javax.swing.JFrame {
     private javax.swing.JTextField campoURI;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;

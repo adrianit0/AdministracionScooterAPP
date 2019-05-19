@@ -34,13 +34,10 @@ public class ConectorTCP {
     private String nick;
     private String token;
     
-    private boolean realizandoConexion;
-    private List<PaqueteServidor> peticiones;
+    private RealizarConexion conexion;
     
-    private boolean conectado;
-    private Socket echoSocket;
-    private PrintWriter out;
-    private BufferedReader in;
+    private String inMessage;
+    private String outMessage;
     
     // Singleton
     private static ConectorTCP instance;
@@ -49,15 +46,14 @@ public class ConectorTCP {
     private final String hostServerName="localhost";
     private final int port = 4444;
     
-    // Test values
-    private String outMessage;
-    private String inMessage;
-    
     private ConectorTCP() {
         paqueteId=10;
-        peticiones = new ArrayList<>();
-        conectado=false;
-        iniciar();
+        conexion = new RealizarConexion ();
+        conexion.start();
+        
+        // TEST
+        inMessage = "No se puede construir la trama de datos de entrada";
+        outMessage = "No se puede construir la trama de datos de salida";
     }
     
     public static ConectorTCP getInstance () {
@@ -66,19 +62,6 @@ public class ConectorTCP {
         }
         
         return instance;
-    }
-    
-    private boolean iniciar() {
-        try {
-            echoSocket = new Socket(hostServerName, port);
-            out = new PrintWriter(echoSocket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(echoSocket.getInputStream()));
-            conectado=true;
-        } catch (IOException ex) {
-            System.err.println("Error de comunicación: " + ex.getMessage());
-            conectado=false;
-        }
-        return conectado;
     }
     
     public static boolean iniciarServidor () {
@@ -92,14 +75,14 @@ public class ConectorTCP {
 
     // Para tests
     public void realizarConexion (String nick, String token, String uri, String paqueteid, Map<String,String> parametros, CallbackRespuesta response) {
-        if (!conectado) {
+        /*if (!conectado) {
             if (!iniciar ()) {
                 RuntimeException e = new RuntimeException ("No se ha podido realizar la conexión");
                 parametros.put("error", e.getMessage());
                 response.error(parametros, Util.CODIGO.notConnection);
                 throw e;
             }
-        }
+        }*/
             
         // Ponemos los valores para realizar la conexión
         PaqueteServidor paquete = new PaqueteServidor();
@@ -110,36 +93,14 @@ public class ConectorTCP {
         paquete.setUri(uri);
         paquete.setCallback(response);
         
-        if (realizandoConexion) {
-            peticiones.add(paquete);
-        } else {
-            //realizar conexión
-            RealizarConexion conexion = new RealizarConexion (paquete);
-            conexion.start();
-        }
+        conexion.addInQueue(paquete);
     }
     
     public void realizarConexion (String trama, CallbackRespuesta response) {
         PaqueteServidor paquete = Util.unpackToServer(trama);
         
-        if (realizandoConexion) {
-            peticiones.add(paquete);
-        } else {
-            //realizar conexión
-            RealizarConexion conexion = new RealizarConexion (paquete);
-            conexion.start();
-        }
+        conexion.addInQueue(paquete);
     }
-    
-    public synchronized void nextQuery () {
-        if (peticiones.size()>0) {
-            RealizarConexion conexion = new RealizarConexion (peticiones.remove(0));
-            conexion.start();
-        } else {
-            realizandoConexion=false;
-        }
-    }
-    
     
     private String getPaqueteID () {
         if (paqueteId==100)
@@ -163,13 +124,14 @@ public class ConectorTCP {
         this.token = token;
     }
 
-    public String getOutMessage() {
-        return outMessage;
-    }
-
     public String getInMessage() {
         return inMessage;
     }
+
+    public String getOutMessage() {
+        return outMessage;
+    }
+    
     
     
     
@@ -184,85 +146,116 @@ public class ConectorTCP {
     
     class RealizarConexion extends Thread {
         
-        private PaqueteServidor paquete;
+        private List<PaqueteServidor> enCola;
+        private Map<String,PaqueteServidor> pendientes;
         
-        public RealizarConexion (PaqueteServidor paquete) {
-            this.paquete = paquete;
+        private Socket echoSocket;
+        private PrintWriter out;
+        private BufferedReader in;
+        
+        private boolean listening;
+        private boolean conectado;
+        
+        public RealizarConexion () {
+            enCola = new ArrayList<>();
+            pendientes = new HashMap<>();
+            listening = true;
+            conectado = false;
+            
+            iniciar();
+        }
+        
+        private boolean iniciar() {
+            try {
+                echoSocket = new Socket(hostServerName, port);
+                out = new PrintWriter(echoSocket.getOutputStream(), true);
+                in = new BufferedReader(new InputStreamReader(echoSocket.getInputStream()));
+                conectado=true;
+            } catch (IOException ex) {
+                System.err.println("Error de comunicación: " + ex.getMessage());
+                conectado=false;
+            }
+            return conectado;
+        }
+        
+        public synchronized void addInQueue(PaqueteServidor paquete) {
+            enCola.add(paquete);
+        }
+        
+        /**
+         Devuelve, a partir de lo que le ha devuelto el servidor, el paquete correcto para ejecutar, y lo elimina de la lista
+         */
+        public synchronized PaqueteServidor getPaquete (PaqueteCliente paquete) {
+            if (!pendientes.containsKey(paquete.getIdPaquete()))
+                return null;
+            
+            return pendientes.remove(paquete.getIdPaquete());
+        }
+        
+        private synchronized boolean hayPaqueteEnCola () {
+            return enCola.size()>0;
         }
         
         @Override
         public void run () {
-            TimeoutConexion timeOut = new TimeoutConexion (this);
-            
             // Conectar juego, con un try-with-resource
             // al ser TRY-WITH-RESOURCE estos se cierran solo al terminar la llave
-            try  {
-                 // Como primer valor le enviamos el nombre y nº de jugadores al servidor
-                String request = Util.packFromServer(paquete);
-                
-                outMessage = request;
-
-                // Le envio la info al servidor
-                out.println(request);
-
-                try {
-                    // Leo la respuesta del servidor
-                    String respuesta = in.readLine();
+            while (listening) {
+                try  {
                     
-                    inMessage = respuesta;
+                    // Preguntamos si hay paquetes en cola para enviar
+                    if (out!=null && hayPaqueteEnCola()) {
+                        PaqueteServidor paquete = enCola.remove(0);
+                        String request = Util.packFromServer(paquete);
+                        
+                        // Le envio la info al servidor
+                       out.println(request);
 
-                    // Muestro la respuesta sin procesar (Solo para debug)
-                    //System.out.println("Respuesta: "+respuesta);
-                    
-                    PaqueteCliente paqueteCliente = Util.unpackToCliente(respuesta);
-
-                    CODIGO codigo = paqueteCliente.getCodigo();
-                    
-                    // Ejecutamos una parte u otra del callback según si devuelve o no errores
-                    if (codigo.getCodigo()>=200 && codigo.getCodigo()<=299) {
-                        paquete.getCallback().success(paqueteCliente.getArgumentos());
-                    } else {
-                        paquete.getCallback().error(paqueteCliente.getArgumentos(), paqueteCliente.getCodigo());
+                       pendientes.put(paquete.getIdPaquete(), paquete);
                     }
-                } catch (SocketException err) {
-                    System.err.println("Error en el envio de datos. " + err.toString());
-                }
+                    
+                    // Preguntamos si hay paquetes de vuelta
+                    if (in!=null && in.ready()) {
+                        String respuesta = in.readLine();
 
-                //System.out.println("Proceso terminado!!!");
-                timeOut.interrupt();
-                
-                nextQuery();
+                        PaqueteCliente paqueteCliente = Util.unpackToCliente(respuesta);
 
-            } catch (UnknownHostException e) {
-                System.err.println("No se conoce el host: " + hostServerName);
-            } catch (IOException e) {
-                System.err.println("No hay conexión para " + hostServerName);
-            } 
-        }
-    }
-    
-    class TimeoutConexion extends Thread {
-        
-        private RealizarConexion con;
-        
-        public TimeoutConexion (RealizarConexion con) {
-            this.con = con;
-        }
-        
-        @Override
-        public void run () {
-            try {
-                this.join(TIMEOUT);
-                if (!this.isInterrupted())  {
-                    System.out.println("TIME OUT");
-                    con.interrupt();
-                    in.close();
+                        if (paqueteCliente!=null) {
+                            CODIGO codigo = paqueteCliente.getCodigo();
+                        
+                            PaqueteServidor paquete = getPaquete(paqueteCliente);
+
+                            // Ejecutamos una parte u otra del callback según si devuelve o no errores
+                            if (paquete != null) {
+                                if (codigo.getCodigo()>=200 && codigo.getCodigo()<=299) {
+                                    paquete.getCallback().success(paqueteCliente.getArgumentos());
+                                } else {
+                                    paquete.getCallback().error(paqueteCliente.getArgumentos(), paqueteCliente.getCodigo());
+                                }
+                            }
+                        } else {
+                            System.err.println("ConectorTCP::run ERROR: trama de entrada \""+ respuesta+"\" formado incorrectamente");
+                        }
+                    }
+                    
+                    // TODO: Mirar si hay paquetes con timeOut
+                    
+                    
+                    // Lo dormimos 0.05s (20 veces por segundos) para esperar antes de la próxima pregunta
+                    Thread.sleep(50);
+                    
+                } catch (UnknownHostException e) {
+                    System.err.println("No se conoce el host: " + hostServerName);
+                } catch (IOException e) {
+                    System.err.println("No hay conexión para " + hostServerName);
+                } catch (InterruptedException ex) {
+                    System.err.println("ConectorTCP::RealizarConexion Error: Timeout. " + ex.toString());
                 }
-            } catch (InterruptedException ex) {
-                System.out.println("ERROR: " + ex.getMessage());
-            } catch (IOException ex) {
-                throw new RuntimeException("No se ha podido finalizar", ex);
             }
+        }
+        
+        public void close() {
+            listening=false;
         }
     }
 }
