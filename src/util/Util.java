@@ -9,7 +9,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -161,6 +163,9 @@ public class Util {
      * TODO: Convertir el paquete en un DTO
      */
     public static String packFromServer (PaqueteServidor paquete) {
+        if (paquete.getArgumentos()==null) {
+            paquete.setArgumentos(new HashMap<String,String>());
+        }
         int total = paquete.getArgumentos().size();
         String[] parametros = new String[total+4];
         parametros[0] = paquete.getIdPaquete();
@@ -372,6 +377,103 @@ public class Util {
         return texto;
     }
     
+    public static List convertMapToList (Class clase, Map<String,String> parametros){
+        List lista = new ArrayList();
+        
+        int length = Integer.parseInt(parametros.get("length"));
+        
+        for (int i = 0; i < length; i++) {
+            Object o = convertMapToObject(clase, parametros, "["+i+"]");
+            if (o!=null) {
+                lista.add(o);
+            }
+        }
+        
+        return lista;
+    }
+    
+    public static Object convertMapToObject (Class clase, Map<String,String> parametros) { 
+        return convertMapToObject(clase, parametros, "");
+    }
+    
+    // FIXME: TODO: Hacer esto
+    public static Object convertMapToObject (Class clase, Map<String,String> parametros, String extra) {
+        Field[] campos = clase.getDeclaredFields();
+        Object obj=null;
+        try {
+            obj = clase.newInstance();
+        } catch (InstantiationException | IllegalAccessException ex) {
+            System.err.println("Util:: convertMapToObject Error: no se puede instanciar el objeto. "+ex.getMessage());
+        }
+        
+        if (obj==null)
+            return null;
+             
+        for (Field f : campos) {
+            String genericType = f.getGenericType().toString().split(" ")[0];
+            
+            if (!genericType.equals("interface")) {
+                try {
+                    boolean ignore = false;
+                    Annotation[] anotaciones = f.getAnnotations();
+                    for (Annotation a : anotaciones) {
+                        if (a.annotationType().getSimpleName().equals("Ignore")){
+                            ignore=true;
+                            break;
+                        }
+                    }
+                    if (ignore) continue;
+                    
+                    String methodName = f.getName();
+                    methodName = "set" + methodName.substring(0, 1).toUpperCase() + methodName.substring(1);
+                    
+                    String getMethodName = "get" + f.getName().substring(0, 1).toUpperCase() + f.getName().substring(1);
+                    Method getMethod = clase.getMethod(getMethodName);
+                    Class returnType = getMethod.getReturnType();
+                    
+                    
+                    Method metodo = clase.getMethod (methodName, returnType);
+                    
+                    Object objectConverted = null;
+                    String parametro = parametros.get(f.getName()+extra);
+                    if (parametro!=null) {
+                        switch (returnType.getSimpleName()) {
+                            case "String":
+                                objectConverted = parametro;
+                                break;
+                            case "Integer":
+                            case "int":
+                                objectConverted = Integer.parseInt(parametro);
+                                break;
+                            case "Double":
+                            case "double":
+                                objectConverted = Double.parseDouble(parametro);
+                                break;
+                            case "Float":
+                            case "float":
+                                objectConverted = Float.parseFloat(parametro);
+                                break;
+                            case "Boolean":
+                            case "boolean":
+                                objectConverted = Boolean.parseBoolean(parametro);
+                            default:
+                                System.err.println("Util::convertMapToObject error: "+returnType.getCanonicalName() + " no es compatible con el parseo");
+                                break;
+                        }
+                    }
+                    
+                    metodo.invoke(obj, objectConverted);
+                    
+                } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+                    System.err.println("Error en "+ f.getName() + ": "+ex.getMessage() + " ("+ex.getClass().getName()+")");
+                    ex.printStackTrace();
+                }
+            }
+        }
+        
+        return obj;
+    }
+    
     /**
      * Convierte los valores de un objeto en un Map<String,String>.
      * 
@@ -408,11 +510,30 @@ public class Util {
                     Method metodo = clase.getMethod (methodName);
                     Object o = metodo.invoke(obj);
                     
+                    System.out.println(o);
                     parametros.put(f.getName()+extra, o==null?null:o.toString());
                 } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
                     System.err.println("Error en "+ f.getName() + ": "+ex.getMessage() + " ("+ex.getClass().getName()+")");
                 }
             }
+        }
+        
+        return parametros;
+    }
+    
+    public static Map<String,String> convertListToMap (List lista) {
+        return convertListToMap(lista, "[", "]");
+    }
+    
+    public static Map<String,String> convertListToMap (List lista, String extraPre, String extraPost) {
+        Map<String,String> parametros = new HashMap<>();
+        parametros.put("length", lista.size()+"");
+        
+        int i = 0;
+        for (Object o : lista) {
+            parametros.putAll(convertObjectToMap(o, extraPre+i+extraPost));
+            
+            i++;
         }
         
         return parametros;

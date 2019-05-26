@@ -20,6 +20,7 @@ import java.util.Optional;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.table.DefaultTableModel;
 import util.CallbackRespuesta;
 import util.Paquete;
 import util.Util;
@@ -66,9 +67,10 @@ public class PaneEdiccion extends javax.swing.JFrame {
         paneles = new ArrayList<JPanel>();
         paneles.add (panelInicio);
         paneles.add(panelEmpleado);
-        
-        
-        
+    }
+    
+    public void addRowToTable (DefaultTableModel modelFactura, Object[] contenido) {
+        modelFactura.addRow(contenido);
     }
 
     /**
@@ -539,25 +541,8 @@ public class PaneEdiccion extends javax.swing.JFrame {
     }
     
     private void botonEmpleado(){
-        changeTab(1);
-        
-        if (empleados==null) {
-            empleados = new HashMap<Integer,Empleado>();
-            
-            ConectorTCP.getInstance().realizarConexion("getEmpleados", null, new CallbackRespuesta () {
-                @Override
-                public void success(Map<String, String> contenido) {
-                    
-                }
-
-                @Override
-                public void error(Map<String, String> contenido, Util.CODIGO codigoError) {
-                    JOptionPane.showMessageDialog(frame, "Error: " + contenido.get("error")); 
-                    empleados = null;
-                }
-                
-            });
-        }
+        PanelEmpleados panel = new PanelEmpleados (this, true);
+        panel.setVisible(true);
     }
     
     private void botonScooter() {

@@ -154,7 +154,7 @@ public class Principal extends javax.swing.JFrame {
         ConectorTCP.getInstance().realizarConexion("login", parametros, new CallbackRespuesta() {
             @Override
             public void success(Map<String,String> contenido) {
-                entrar(contenido.get("token"), contenido.get("email"));
+                entrar(contenido.get("token"), contenido.get("nick"));
             }
 
             @Override
@@ -169,6 +169,8 @@ public class Principal extends javax.swing.JFrame {
         //System.out.println("SUCCESS!");
         PaneEdiccion ediccion = new PaneEdiccion(this, token, nick);
         ediccion.setVisible(true);
+        ConectorTCP.getInstance().setNick(nick);
+        ConectorTCP.getInstance().setToken(token);
         this.setVisible(false);
     }
     

@@ -5,18 +5,67 @@
  */
 package principal;
 
+import conexion.ConectorTCP;
+import dialog.CrudEmpleado;
+import entidades.Empleado;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+import util.CallbackRespuesta;
+import util.Util;
+
 /**
  *
  * @author agarcia.gonzalez
  */
 public class PanelEmpleados extends javax.swing.JDialog {
 
+    private PaneEdiccion parent;
+    private DefaultTableModel model;
+    
     /**
      * Creates new form PanelEmpleados
      */
     public PanelEmpleados(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        
+        this.parent = (PaneEdiccion) parent;
+        
+        this.setLocationRelativeTo(null);
+        
+        model = (DefaultTableModel) tablaEmpleados.getModel();
+        
+        actualizarTabla();
+    }
+    
+    public void actualizarTabla() {
+        ConectorTCP.getInstance().realizarConexion("getEmpleados", null, new CallbackRespuesta() {
+            @Override
+            public void success(Map<String, String> contenido) {
+                model.setRowCount(0);   // Reiniciamos el contenido de la tabla
+                
+                List<Empleado> lista = util.Util.convertMapToList(Empleado.class, contenido);
+                
+                for (Empleado e : lista) {
+                    parent.addRowToTable(model, new Object[] {
+                        e.getId(),
+                        e.getNombre() + " " + e.getApellido1() + ((e.getApellido2()!=null) ? " " + e.getApellido2() : ""),
+                        "Desconocido",
+                        e.getDireccion()
+                    });
+                }
+                
+            }
+
+            @Override
+            public void error(Map<String, String> contenido, Util.CODIGO codigoError) {
+                System.out.println("ERROR: " + contenido.get("error"));
+            }
+            
+        });
     }
 
     /**
@@ -31,7 +80,7 @@ public class PanelEmpleados extends javax.swing.JDialog {
         panelEmpleado1 = new javax.swing.JPanel();
         jLabel9 = new javax.swing.JLabel();
         jScrollPane3 = new javax.swing.JScrollPane();
-        tablaFacturas2 = new javax.swing.JTable();
+        tablaEmpleados = new javax.swing.JTable();
         botonNuevo = new javax.swing.JButton();
         botonEditar = new javax.swing.JButton();
         botonEliminar = new javax.swing.JButton();
@@ -45,7 +94,7 @@ public class PanelEmpleados extends javax.swing.JDialog {
         jLabel9.setForeground(new java.awt.Color(255, 255, 255));
         jLabel9.setText("Empleados");
 
-        tablaFacturas2.setModel(new javax.swing.table.DefaultTableModel(
+        tablaEmpleados.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -68,7 +117,7 @@ public class PanelEmpleados extends javax.swing.JDialog {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane3.setViewportView(tablaFacturas2);
+        jScrollPane3.setViewportView(tablaEmpleados);
 
         botonNuevo.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         botonNuevo.setText("Nuevo empleado");
@@ -146,17 +195,71 @@ public class PanelEmpleados extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void botonNuevoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonNuevoActionPerformed
-        // TODO add your handling code here:
+        abrirCreacionEmpleado();
     }//GEN-LAST:event_botonNuevoActionPerformed
 
     private void botonEditarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonEditarActionPerformed
-        // TODO add your handling code here:
+        abrirEdiccionEmpleado();
     }//GEN-LAST:event_botonEditarActionPerformed
 
     private void botonEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonEliminarActionPerformed
-        // TODO add your handling code here:
+        eliminarEmpleado();
     }//GEN-LAST:event_botonEliminarActionPerformed
 
+    private void abrirEdiccionEmpleado() {
+        int id = tablaEmpleados.getSelectedRow();
+        
+        if (id>=0) {
+            String rowId = tablaEmpleados.getValueAt(id, 0).toString();
+            
+            int seleccionado = Integer.parseInt(rowId);
+            
+            System.out.println("SELECCIONADO: " + seleccionado);
+            
+            CrudEmpleado crud = new CrudEmpleado (parent, this, true, true, seleccionado);
+            crud.setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(null, "No tienes seleccionado ningún empleado");
+        }
+    }
+    
+    private void abrirCreacionEmpleado () {
+        CrudEmpleado crud = new CrudEmpleado (parent, this, true, false, 0);
+        crud.setVisible(true);
+    }
+    
+    private void eliminarEmpleado () {
+        int id = tablaEmpleados.getSelectedRow();
+        
+        if (id>=0) {
+            int eleccion = JOptionPane.showConfirmDialog(parent, "Quieres eliminar este empleado?");
+            if (eleccion==0) {
+                String rowId = tablaEmpleados.getValueAt(id, 0).toString();
+            
+                int seleccionado = Integer.parseInt(rowId);
+                
+                Map<String,String> parametros = new HashMap<String,String>();
+                parametros.put("id", seleccionado+"");
+                
+                ConectorTCP.getInstance().realizarConexion("deleteEmpleado", parametros, new CallbackRespuesta() {
+                    @Override
+                    public void success(Map<String, String> contenido) {
+                        JOptionPane.showMessageDialog(null, "Se ha eliminado el empleado");
+                        actualizarTabla();
+                    }
+
+                    @Override
+                    public void error(Map<String, String> contenido, Util.CODIGO codigoError) {
+                        JOptionPane.showMessageDialog(null, "No se ha podido eliminar el empleado: " + contenido.get("error"));
+                    }
+                    
+                });
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "No tienes seleccionado ningún empleado");
+        }
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -187,7 +290,7 @@ public class PanelEmpleados extends javax.swing.JDialog {
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                PanelEmpleados dialog = new PanelEmpleados(new javax.swing.JFrame(), true);
+                PanelEmpleados dialog = new PanelEmpleados(new PaneEdiccion(null, "1", "1"), true);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
@@ -206,6 +309,6 @@ public class PanelEmpleados extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JPanel panelEmpleado1;
-    private javax.swing.JTable tablaFacturas2;
+    private javax.swing.JTable tablaEmpleados;
     // End of variables declaration//GEN-END:variables
 }
