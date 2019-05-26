@@ -5,10 +5,20 @@
  */
 package scooter;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
 import conexion.ConectorTCP;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static javax.swing.Spring.height;
 import util.CallbackRespuesta;
 import util.Util;
 
@@ -24,6 +34,9 @@ public class ScooterController extends Thread {
     private final int maxIntentos = 10;
     private final long tiempoEntreIntento = 5000;
     
+    private final int width = 350;
+    private final int height = 350;
+    
     public ScooterController (Scooter scooter) {
         this.scooter = scooter;
     }
@@ -31,6 +44,9 @@ public class ScooterController extends Thread {
     @Override
     public void run() {
         conectar();
+        
+        // Creamos una imagen Qr en local
+        generarImagenQr();
     }
     
     private void conectar () {
@@ -69,6 +85,37 @@ public class ScooterController extends Thread {
         });
     }
     
+    private void generarImagenQr () {
+        String root = "Qr";
+        String ruta = root+"/Scooter" + scooter.getNoSerie() + ".png";
+        String texto = "SC:"+scooter.getCodigo();
+        
+        try {
+            // Miramos si existe la carpeta para añadir los QR para crearlo en caso de que no exista
+            File carpeta = new File("./"+root);
+            if (!carpeta.exists()) {
+                carpeta.mkdir();
+            }
+            
+            // Miramos si ya existe el archivo Qr, para no volver a generar más
+            File archivo= new File ("./" + ruta);
+            if (archivo.exists()) {
+                System.out.println("El archivo " +archivo.getAbsolutePath()+" actualmente existe, no se volverá a crear." );
+                return;
+            }
+            QRCodeWriter qrCodeWriter = new QRCodeWriter();
+            BitMatrix bitMatrix = qrCodeWriter.encode(texto, BarcodeFormat.QR_CODE, width, height);
+
+            Path path = FileSystems.getDefault().getPath(ruta);
+            System.out.println(path.toFile().getAbsoluteFile());
+            MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
+            
+            System.out.println("Imagen generado correctamente");
+        } catch (WriterException | IOException e) {
+            System.err.println("ScooterController::generarImagenQr error: " + e.getMessage());
+        }
+        
+    }
     
     private void ejecutando () {
         // Crear una rutina de acciones a realizar cada cierto tiempo
