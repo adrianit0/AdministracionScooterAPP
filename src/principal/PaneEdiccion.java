@@ -546,11 +546,12 @@ public class PaneEdiccion extends javax.swing.JFrame {
     }
     
     private void botonScooter() {
-        changeTab(2);
+        
     }
     
     private void botonBonos () {
-        changeTab(3);
+        PanelBonos panel = new PanelBonos (this, true);
+        panel.setVisible(true);
     }
     
     private void changeTab (int pos) {

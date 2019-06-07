@@ -6,7 +6,9 @@
 package principal;
 
 import conexion.ConectorTCP;
+import dialog.CrudBono;
 import dialog.CrudEmpleado;
+import entidades.Bono;
 import entidades.Empleado;
 import java.util.HashMap;
 import java.util.List;
@@ -20,15 +22,15 @@ import util.Util;
  *
  * @author agarcia.gonzalez
  */
-public class PanelEmpleados extends javax.swing.JDialog {
+public class PanelBonos extends javax.swing.JDialog {
 
     private PaneEdiccion parent;
     private DefaultTableModel model;
     
     /**
-     * Creates new form PanelEmpleados
+     * Creates new form PanelBonos
      */
-    public PanelEmpleados(java.awt.Frame parent, boolean modal) {
+    public PanelBonos(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
         
@@ -36,25 +38,26 @@ public class PanelEmpleados extends javax.swing.JDialog {
         
         this.setLocationRelativeTo(null);
         
-        model = (DefaultTableModel) tablaEmpleados.getModel();
+        model = (DefaultTableModel) tablaBonos.getModel();
         
         actualizarTabla();
     }
     
     public void actualizarTabla() {
-        ConectorTCP.getInstance().realizarConexion("getEmpleados", null, new CallbackRespuesta() {
+        ConectorTCP.getInstance().realizarConexion("getBonos", null, new CallbackRespuesta() {
             @Override
             public void success(Map<String, String> contenido) {
                 model.setRowCount(0);   // Reiniciamos el contenido de la tabla
                 
-                List<Empleado> lista = util.Util.convertMapToList(Empleado.class, contenido);
+                List<Bono> lista = util.Util.convertMapToList(Bono.class, contenido);
                 
-                for (Empleado e : lista) {
+                for (Bono b : lista) {
                     parent.addRowToTable(model, new Object[] {
-                        e.getId(),
-                        e.getNombre() + " " + e.getApellido1() + ((e.getApellido2()!=null) ? " " + e.getApellido2() : ""),
-                        "Desconocido",
-                        e.getDireccion()
+                        b.getId(),
+                        b.getNombre(),
+                        b.getDescripcion(),
+                        b.getMinutos()+"",
+                        b.getPrecio()+"€"
                     });
                 }
                 
@@ -80,33 +83,32 @@ public class PanelEmpleados extends javax.swing.JDialog {
         panelEmpleado1 = new javax.swing.JPanel();
         jLabel9 = new javax.swing.JLabel();
         jScrollPane3 = new javax.swing.JScrollPane();
-        tablaEmpleados = new javax.swing.JTable();
+        tablaBonos = new javax.swing.JTable();
         botonNuevo = new javax.swing.JButton();
         botonEditar = new javax.swing.JButton();
         botonEliminar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setBackground(new java.awt.Color(153, 255, 102));
 
         panelEmpleado1.setBackground(new java.awt.Color(51, 51, 51));
 
         jLabel9.setFont(new java.awt.Font("Tahoma", 1, 24)); // NOI18N
         jLabel9.setForeground(new java.awt.Color(255, 255, 255));
-        jLabel9.setText("Empleados");
+        jLabel9.setText("Bonos");
 
-        tablaEmpleados.setModel(new javax.swing.table.DefaultTableModel(
+        tablaBonos.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
             new String [] {
-                "ID", "Nombre", "Puesto", "Direccion"
+                "ID", "Nombre", "Descripcion", "Minutos", "Precio"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false
+                false, false, false, false, true
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -117,10 +119,10 @@ public class PanelEmpleados extends javax.swing.JDialog {
                 return canEdit [columnIndex];
             }
         });
-        jScrollPane3.setViewportView(tablaEmpleados);
+        jScrollPane3.setViewportView(tablaBonos);
 
         botonNuevo.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        botonNuevo.setText("Nuevo empleado");
+        botonNuevo.setText("Nuevo bono");
         botonNuevo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 botonNuevoActionPerformed(evt);
@@ -128,7 +130,7 @@ public class PanelEmpleados extends javax.swing.JDialog {
         });
 
         botonEditar.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        botonEditar.setText("Editar empleado");
+        botonEditar.setText("Editar bono");
         botonEditar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 botonEditarActionPerformed(evt);
@@ -136,7 +138,7 @@ public class PanelEmpleados extends javax.swing.JDialog {
         });
 
         botonEliminar.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        botonEliminar.setText("Eliminar empleado");
+        botonEliminar.setText("Eliminar bono");
         botonEliminar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 botonEliminarActionPerformed(evt);
@@ -158,8 +160,8 @@ public class PanelEmpleados extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(panelEmpleado1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(botonNuevo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(botonEditar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 175, Short.MAX_VALUE)
-                            .addComponent(botonEliminar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 175, Short.MAX_VALUE))))
+                            .addComponent(botonEditar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 192, Short.MAX_VALUE)
+                            .addComponent(botonEliminar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 192, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         panelEmpleado1Layout.setVerticalGroup(
@@ -206,57 +208,56 @@ public class PanelEmpleados extends javax.swing.JDialog {
         eliminarEmpleado();
     }//GEN-LAST:event_botonEliminarActionPerformed
 
+    
     private void abrirEdiccionEmpleado() {
-        int id = tablaEmpleados.getSelectedRow();
+        int id = tablaBonos.getSelectedRow();
         
         if (id>=0) {
-            String rowId = tablaEmpleados.getValueAt(id, 0).toString();
+            String rowId = tablaBonos.getValueAt(id, 0).toString();
             
             int seleccionado = Integer.parseInt(rowId);
             
-            System.out.println("SELECCIONADO: " + seleccionado);
-            
-            CrudEmpleado crud = new CrudEmpleado (parent, this, true, true, seleccionado);
+            CrudBono crud = new CrudBono (parent, this, true, true, seleccionado);
             crud.setVisible(true);
         } else {
-            JOptionPane.showMessageDialog(null, "No tienes seleccionado ningún empleado");
+            JOptionPane.showMessageDialog(null, "No tienes seleccionado ningún bono");
         }
     }
     
     private void abrirCreacionEmpleado () {
-        CrudEmpleado crud = new CrudEmpleado (parent, this, true, false, 0);
+        CrudBono crud = new CrudBono (parent, this, true, false, 0);
         crud.setVisible(true);
     }
     
     private void eliminarEmpleado () {
-        int id = tablaEmpleados.getSelectedRow();
+        int id = tablaBonos.getSelectedRow();
         
         if (id>=0) {
-            int eleccion = JOptionPane.showConfirmDialog(parent, "Quieres eliminar este empleado?");
+            int eleccion = JOptionPane.showConfirmDialog(parent, "Quieres eliminar este bono?");
             if (eleccion==0) {
-                String rowId = tablaEmpleados.getValueAt(id, 0).toString();
+                String rowId = tablaBonos.getValueAt(id, 0).toString();
             
                 int seleccionado = Integer.parseInt(rowId);
                 
                 Map<String,String> parametros = new HashMap<String,String>();
                 parametros.put("id", seleccionado+"");
                 
-                ConectorTCP.getInstance().realizarConexion("deleteEmpleado", parametros, new CallbackRespuesta() {
+                ConectorTCP.getInstance().realizarConexion("deleteBono", parametros, new CallbackRespuesta() {
                     @Override
                     public void success(Map<String, String> contenido) {
-                        JOptionPane.showMessageDialog(null, "Se ha eliminado el empleado");
+                        JOptionPane.showMessageDialog(null, "Se ha eliminado el bono");
                         actualizarTabla();
                     }
 
                     @Override
                     public void error(Map<String, String> contenido, Util.CODIGO codigoError) {
-                        JOptionPane.showMessageDialog(null, "No se ha podido eliminar el empleado: " + contenido.get("error"));
+                        JOptionPane.showMessageDialog(null, "No se ha podido eliminar el bono: " + contenido.get("error"));
                     }
                     
                 });
             }
         } else {
-            JOptionPane.showMessageDialog(null, "No tienes seleccionado ningún empleado");
+            JOptionPane.showMessageDialog(null, "No tienes seleccionado ningún bono");
         }
     }
     
@@ -277,20 +278,20 @@ public class PanelEmpleados extends javax.swing.JDialog {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(PanelEmpleados.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(PanelBonos.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(PanelEmpleados.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(PanelBonos.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(PanelEmpleados.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(PanelBonos.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(PanelEmpleados.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(PanelBonos.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
 
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                PanelEmpleados dialog = new PanelEmpleados(new PaneEdiccion(null, "1", "1"), true);
+                PanelBonos dialog = new PanelBonos(new javax.swing.JFrame(), true);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
@@ -309,6 +310,6 @@ public class PanelEmpleados extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel9;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JPanel panelEmpleado1;
-    private javax.swing.JTable tablaEmpleados;
+    private javax.swing.JTable tablaBonos;
     // End of variables declaration//GEN-END:variables
 }

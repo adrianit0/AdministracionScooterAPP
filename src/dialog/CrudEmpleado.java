@@ -104,7 +104,7 @@ public class CrudEmpleado extends javax.swing.JDialog {
     private Empleado convertirEnEmpleado () {
         Empleado empleado = new Empleado ();
         
-        if (campoId.getText()!=null)
+        if (campoId.getText()!=null && campoId.getText().isEmpty())
             empleado.setId(Integer.parseInt(campoId.getText()));
         empleado.setNombre(textoNombre.getText());
         empleado.setApellido1(textoApellido1.getText());
@@ -293,7 +293,7 @@ public class CrudEmpleado extends javax.swing.JDialog {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(10, 10, 10)
-                        .addComponent(jComboBox3, 0, 248, Short.MAX_VALUE))
+                        .addComponent(jComboBox3, 0, 249, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(botonCancelar, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
