@@ -21,7 +21,7 @@ public class InicializarUnScooter {
         scooter.setNoSerie("Scooter#1");
         scooter.setBateria(100f);
         scooter.setCodigo(123456);
-        scooter.setBloqueado(true);
+        scooter.setBloqueado(false);
         
         scooter.setLatitud(36.510960f);
         scooter.setLongitud(-6.278162f);

@@ -5,11 +5,6 @@
  */
 package scooter;
 
-import conexion.ConectorTCP;
-import java.util.Map;
-import util.CallbackRespuesta;
-import util.Util;
-
 /**
  *
  * @author agarcia.gonzalez
@@ -29,7 +24,7 @@ public class InicializarMuchasScooters {
         scooter.setNoSerie("Scooter#S"+serie);
         scooter.setBateria(100f);
         scooter.setCodigo(codigo);
-        scooter.setBloqueado(true);
+        scooter.setBloqueado(true); // Empezará bloqueada hasta que haga login
         scooter.setBateria(bateria);
         
         scooter.setLatitud(lat);
