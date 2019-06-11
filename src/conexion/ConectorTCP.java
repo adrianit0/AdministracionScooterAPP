@@ -6,18 +6,18 @@
 package conexion;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import util.CallbackRespuesta;
 import util.PaqueteCliente;
 import util.PaqueteServidor;
@@ -42,11 +42,34 @@ public class ConectorTCP {
     // Singleton
     private static ConectorTCP instance;
     
-    private final long TIMEOUT = 1000;
-    private final String hostServerName="localhost";
-    private final int port = 4444;
+    private long timeout = 1000;
+    private String hostServerName="localhost";
+    private int port = 4444;
     
-    private ConectorTCP() {
+    private final String RUTA_CONFIG = "serverconfig.txt";
+    
+    private ConectorTCP() throws FileNotFoundException, IOException {
+        File f = new File(RUTA_CONFIG);
+        BufferedReader buffer=new BufferedReader(new FileReader(f));
+        while(buffer.ready()) {
+            String texto = buffer.readLine();
+            String[] splitted = texto.split("=");
+            if (splitted.length==2) {
+                switch(splitted[0]) {
+                    case "timeout":
+                        timeout=Integer.parseInt(splitted[1]);
+                        break;
+                    case "hostServerName":
+                    case "server":
+                        hostServerName=splitted[1];
+                        break;
+                    case "port":
+                        port=Integer.parseInt(splitted[1]);
+                        break;
+                }
+            }
+        }
+        
         paqueteId=10;
         conexion = new RealizarConexion ();
         conexion.start();
@@ -65,7 +88,13 @@ public class ConectorTCP {
     }
     
     public static boolean iniciarServidor () {
-        instance=new ConectorTCP();
+        try {
+            instance=new ConectorTCP();
+        } catch (Exception e) {
+            System.err.println("Error al inicializar el servidor. "+ e.getMessage());
+            return false;
+        }
+        
         return true;
     }
     

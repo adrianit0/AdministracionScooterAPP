@@ -20,6 +20,7 @@ public class PaqueteServidor implements IPaquete {
     private String nick;
     private String token;
     private String uri;
+    private boolean destroyable;
     
     private CallbackRespuesta callback;
     
@@ -37,8 +38,17 @@ public class PaqueteServidor implements IPaquete {
         this.uri = uri;
         this.argumentos = argumentos;
         this.objetos = new TreeMap<>();
+        this.destroyable=true;
     }
 
+    public boolean isDestroyable() {
+        return destroyable;
+    }
+
+    public void setDestroyable(boolean destroyable) {
+        this.destroyable = destroyable;
+    }
+    
     public CallbackRespuesta getCallback() {
         return callback;
     }
