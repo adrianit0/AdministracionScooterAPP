@@ -47,6 +47,7 @@ public class Principal extends javax.swing.JFrame {
 
         jPanel5.setBackground(new java.awt.Color(204, 204, 204));
 
+        campoEmail.setText("admin");
         campoEmail.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 campoEmailActionPerformed(evt);
@@ -68,6 +69,7 @@ public class Principal extends javax.swing.JFrame {
             }
         });
 
+        campoPass.setText("1234");
         campoPass.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 campoPassActionPerformed(evt);
@@ -144,17 +146,17 @@ public class Principal extends javax.swing.JFrame {
     private void conectar () {
         Map<String,String> parametros = new HashMap<String,String>();
         
-        parametros.put("nick", campoEmail.getText());
+        parametros.put("email", campoEmail.getText());
         parametros.put("pass", campoPass.getText());
         
         botonConectar.setEnabled(false);
         
         final JFrame frame = this;
         
-        ConectorTCP.getInstance().realizarConexion("login", parametros, new CallbackRespuesta() {
+        ConectorTCP.getInstance().realizarConexion("loginAsAdministrador", parametros, new CallbackRespuesta() {
             @Override
             public void success(Map<String,String> contenido) {
-                entrar(contenido.get("token"), contenido.get("nick"));
+                entrar(contenido.get("token"), contenido.get("email"));
             }
 
             @Override
@@ -167,10 +169,10 @@ public class Principal extends javax.swing.JFrame {
     
     private void entrar (String token, String nick) {
         //System.out.println("SUCCESS!");
-        PaneEdiccion ediccion = new PaneEdiccion(this, token, nick);
-        ediccion.setVisible(true);
         ConectorTCP.getInstance().setNick(nick);
         ConectorTCP.getInstance().setToken(token);
+        PaneEdiccion ediccion = new PaneEdiccion(this, token, nick);
+        ediccion.setVisible(true);
         this.setVisible(false);
     }
     

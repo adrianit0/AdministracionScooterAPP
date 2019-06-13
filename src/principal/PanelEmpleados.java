@@ -84,6 +84,7 @@ public class PanelEmpleados extends javax.swing.JDialog {
         botonNuevo = new javax.swing.JButton();
         botonEditar = new javax.swing.JButton();
         botonEliminar = new javax.swing.JButton();
+        botonDarBaja = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setBackground(new java.awt.Color(153, 255, 102));
@@ -143,6 +144,14 @@ public class PanelEmpleados extends javax.swing.JDialog {
             }
         });
 
+        botonDarBaja.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        botonDarBaja.setText("Dar baja empleado");
+        botonDarBaja.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botonDarBajaActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout panelEmpleado1Layout = new javax.swing.GroupLayout(panelEmpleado1);
         panelEmpleado1.setLayout(panelEmpleado1Layout);
         panelEmpleado1Layout.setHorizontalGroup(
@@ -159,7 +168,8 @@ public class PanelEmpleados extends javax.swing.JDialog {
                         .addGroup(panelEmpleado1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(botonNuevo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(botonEditar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 175, Short.MAX_VALUE)
-                            .addComponent(botonEliminar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 175, Short.MAX_VALUE))))
+                            .addComponent(botonEliminar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 175, Short.MAX_VALUE)
+                            .addComponent(botonDarBaja, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 175, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         panelEmpleado1Layout.setVerticalGroup(
@@ -176,6 +186,8 @@ public class PanelEmpleados extends javax.swing.JDialog {
                         .addComponent(botonEditar)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(botonEliminar)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(botonDarBaja)
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -205,6 +217,10 @@ public class PanelEmpleados extends javax.swing.JDialog {
     private void botonEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonEliminarActionPerformed
         eliminarEmpleado();
     }//GEN-LAST:event_botonEliminarActionPerformed
+
+    private void botonDarBajaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonDarBajaActionPerformed
+        darBajaEmpleado();
+    }//GEN-LAST:event_botonDarBajaActionPerformed
 
     private void abrirEdiccionEmpleado() {
         int id = tablaEmpleados.getSelectedRow();
@@ -260,6 +276,38 @@ public class PanelEmpleados extends javax.swing.JDialog {
         }
     }
     
+    private void darBajaEmpleado () {
+        int id = tablaEmpleados.getSelectedRow();
+        
+        if (id>=0) {
+            int eleccion = JOptionPane.showConfirmDialog(parent, "Quieres dar de baja a este empleado?");
+            if (eleccion==0) {
+                String rowId = tablaEmpleados.getValueAt(id, 0).toString();
+            
+                int seleccionado = Integer.parseInt(rowId);
+                
+                Map<String,String> parametros = new HashMap<String,String>();
+                parametros.put("id", seleccionado+"");
+                
+                ConectorTCP.getInstance().realizarConexion("bajaEmpleado", parametros, new CallbackRespuesta() {
+                    @Override
+                    public void success(Map<String, String> contenido) {
+                        JOptionPane.showMessageDialog(null, "Se ha dado de baja al empleado");
+                        actualizarTabla();
+                    }
+
+                    @Override
+                    public void error(Map<String, String> contenido, Util.CODIGO codigoError) {
+                        JOptionPane.showMessageDialog(null, "No se ha podido dar de baja al empleado: " + contenido.get("error"));
+                    }
+                    
+                });
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "No tienes seleccionado ningún empleado");
+        }
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -303,6 +351,7 @@ public class PanelEmpleados extends javax.swing.JDialog {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton botonDarBaja;
     private javax.swing.JButton botonEditar;
     private javax.swing.JButton botonEliminar;
     private javax.swing.JButton botonNuevo;

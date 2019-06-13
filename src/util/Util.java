@@ -175,7 +175,6 @@ public class Util {
         int actual = 4;
         
         
-        
         for (Map.Entry<String, String> entry : paquete.getArgumentos().entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
@@ -347,13 +346,13 @@ public class Util {
     // usando un sistema de entidades parecidas a la que utiliza HTML
     private static String transformarKeyValue (String texto) {
         if (texto==null) return null;
-        return texto.replaceAll("[&]", "&a").replaceAll("["+separatorArgs+"]", "&d")/*.replaceAll("[{]", "&i").replaceAll("[}]", "&f")*/.replaceAll("[|]", "&p").replaceAll("["+separator+"]", "&c");
+        return texto.replaceAll("[&]", "&a").replaceAll("\n", "&s").replaceAll("["+separatorArgs+"]", "&d")/*.replaceAll("[{]", "&i").replaceAll("[}]", "&f")*/.replaceAll("[|]", "&p").replaceAll("["+separator+"]", "&c");
     }
     
     // Vuelve a convertir de las entidades al que habia antes
     private static String destransformarKeyValue (String texto) {
         if (texto==null) return null;
-        return texto.replaceAll("&c", separator).replaceAll("&p", "|")/*.replaceAll("&f", "}").replaceAll("&i", "{")*/.replaceAll("&d", separatorArgs).replaceAll("[&]", "&a");
+        return texto.replaceAll("&c", separator).replaceAll("&p", "|")/*.replaceAll("&f", "}").replaceAll("&i", "{")*/.replaceAll("&d", separatorArgs).replaceAll("&s", "\n").replaceAll("[&]", "&a");
     }
     
     /**
@@ -511,7 +510,7 @@ public class Util {
                     Object o = metodo.invoke(obj);
                     
                     System.out.println(o);
-                    parametros.put(f.getName()+extra, o==null?null:o.toString());
+                    parametros.put(f.getName()+extra, o==null||o.toString().isEmpty()?null:o.toString());
                 } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
                     System.err.println("Error en "+ f.getName() + ": "+ex.getMessage() + " ("+ex.getClass().getName()+")");
                 }

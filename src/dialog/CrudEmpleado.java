@@ -8,10 +8,16 @@ package dialog;
 import conexion.ConectorTCP;
 import entidades.Empleado;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
+import principal.PaneEdiccion;
 import principal.PanelEmpleados;
 import util.CallbackRespuesta;
+import util.ItemReducido;
 import util.Util;
 
 /**
@@ -22,6 +28,12 @@ public class CrudEmpleado extends javax.swing.JDialog {
 
     private boolean esEditar;
     private PanelEmpleados empleados;
+    
+    private List ciudades;
+    private List sedes;
+    private List puestos;
+    
+    private PaneEdiccion paneEdiccion;
     
     /**
      * Creates new form CrudEmpleado
@@ -39,6 +51,15 @@ public class CrudEmpleado extends javax.swing.JDialog {
         
         textoTitulo.setText(esEditar ? "Editar empleado" : "Nuevo empleado");
         
+        paneEdiccion = (PaneEdiccion) parent;
+        ciudades = paneEdiccion.getCiudades();
+        sedes = paneEdiccion.getSedes();
+        puestos = paneEdiccion.getPuestos();
+        
+        rellenarComboBox (comboCiudad, ciudades);
+        rellenarComboBox (comboSede, sedes);
+        rellenarComboBox (comboPuesto, puestos);
+        
         this.setLocationRelativeTo(null);
         
         if (esEditar)
@@ -55,11 +76,15 @@ public class CrudEmpleado extends javax.swing.JDialog {
                     textoNombre.setText(contenido.get("nombre"));
                     textoApellido1.setText(contenido.get("apellido1"));
                     textoApellido2.setText(contenido.get("apellido2"));
-                    textoPass.setText("***");
+                    textoPass.setText("");
                     textoDireccion.setText(contenido.get("direccion"));
                     textoSueldo.setText(contenido.get("sueldo"));
                     textoEmail.setText(contenido.get("email"));
                     textoDNI.setText(contenido.get("dni"));
+                    
+                    seleccionarValorCombo(comboCiudad, ciudades, Integer.parseInt(contenido.get("ciudad")));
+                    seleccionarValorCombo(comboPuesto, puestos, Integer.parseInt(contenido.get("puesto")));
+                    seleccionarValorCombo(comboSede, sedes, Integer.parseInt(contenido.get("sede")));
 
                     botonAceptar.setEnabled(true);
                     
@@ -74,10 +99,46 @@ public class CrudEmpleado extends javax.swing.JDialog {
         }
     }
     
+    private void seleccionarValorCombo (JComboBox combo, List<ItemReducido> lista, int keyValue) {
+        combo.setEditable(true);
+        for (ItemReducido item : lista) {
+            if (item.getIndex()==keyValue) {
+                combo.setSelectedItem(item.getValue());
+            }
+        }
+        combo.setEditable(false);
+    }
+    
+    private Integer seleccionarKeyCombo (JComboBox combo, List<ItemReducido> lista) {
+        String valor = combo.getSelectedItem().toString();
+        for (ItemReducido item : lista) {
+            if (item.getValue().equals(valor)) 
+                return item.getIndex();
+        }
+        
+        return null;
+    }
+    
+    private void rellenarComboBox (JComboBox combo, List lista) {
+        combo.setModel(new DefaultComboBoxModel (lista.toArray()));
+        
+        //combo.setEditable(true);
+        combo.setEnabled(true);
+    }
+    
     public void aceptar() {
         Empleado empleado = convertirEnEmpleado();
         
         Map<String,String> parametros = util.Util.convertObjectToMap(empleado);
+        Integer ciudadId = seleccionarKeyCombo(comboCiudad, ciudades);
+        Integer sedeId = seleccionarKeyCombo(comboSede, sedes);
+        Integer puestoId = seleccionarKeyCombo(comboPuesto, puestos);
+        if (ciudadId!=null)
+            parametros.put("ciudadId",  ciudadId.toString());
+        if (sedeId!=null)
+            parametros.put("sedeId", sedeId.toString());
+        if (puestoId!=null)
+            parametros.put("puestoId", puestoId.toString());
         
         String uri = esEditar ? "updateEmpleado" : "createEmpleado";
         
@@ -104,7 +165,7 @@ public class CrudEmpleado extends javax.swing.JDialog {
     private Empleado convertirEnEmpleado () {
         Empleado empleado = new Empleado ();
         
-        if (campoId.getText()!=null && campoId.getText().isEmpty())
+        if (campoId.getText()!=null && !campoId.getText().isEmpty())
             empleado.setId(Integer.parseInt(campoId.getText()));
         empleado.setNombre(textoNombre.getText());
         empleado.setApellido1(textoApellido1.getText());
@@ -153,9 +214,9 @@ public class CrudEmpleado extends javax.swing.JDialog {
         textoEmail = new javax.swing.JTextField();
         textoPass = new javax.swing.JTextField();
         textoSueldo = new javax.swing.JTextField();
-        jComboBox1 = new javax.swing.JComboBox<>();
-        jComboBox2 = new javax.swing.JComboBox<>();
-        jComboBox3 = new javax.swing.JComboBox<>();
+        comboPuesto = new javax.swing.JComboBox<>();
+        comboCiudad = new javax.swing.JComboBox<>();
+        comboSede = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -229,14 +290,14 @@ public class CrudEmpleado extends javax.swing.JDialog {
 
         textoPass.setEditable(false);
 
-        jComboBox1.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Descnonocido" }));
-        jComboBox1.setEnabled(false);
+        comboPuesto.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Descnonocido" }));
+        comboPuesto.setEnabled(false);
 
-        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Descnonocido" }));
-        jComboBox2.setEnabled(false);
+        comboCiudad.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Descnonocido" }));
+        comboCiudad.setEnabled(false);
 
-        jComboBox3.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Descnonocido" }));
-        jComboBox3.setEnabled(false);
+        comboSede.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Descnonocido" }));
+        comboSede.setEnabled(false);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -285,15 +346,15 @@ public class CrudEmpleado extends javax.swing.JDialog {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jComboBox1, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(comboPuesto, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(10, 10, 10)
-                        .addComponent(jComboBox2, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(comboCiudad, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(10, 10, 10)
-                        .addComponent(jComboBox3, 0, 249, Short.MAX_VALUE))
+                        .addComponent(comboSede, 0, 249, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(botonCancelar, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -346,15 +407,15 @@ public class CrudEmpleado extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel11)
-                    .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(comboPuesto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel12)
-                    .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(comboCiudad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel13)
-                    .addComponent(jComboBox3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(comboSede, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 24, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(botonAceptar)
@@ -419,9 +480,9 @@ public class CrudEmpleado extends javax.swing.JDialog {
     private javax.swing.JButton botonAceptar;
     private javax.swing.JButton botonCancelar;
     private javax.swing.JTextField campoId;
-    private javax.swing.JComboBox<String> jComboBox1;
-    private javax.swing.JComboBox<String> jComboBox2;
-    private javax.swing.JComboBox<String> jComboBox3;
+    private javax.swing.JComboBox<String> comboCiudad;
+    private javax.swing.JComboBox<String> comboPuesto;
+    private javax.swing.JComboBox<String> comboSede;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;

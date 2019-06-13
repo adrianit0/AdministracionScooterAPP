@@ -125,10 +125,9 @@ public class ConectorTCP {
         conexion.addInQueue(paquete);
     }
     
-    public void realizarConexion (String trama, CallbackRespuesta response) {
-        PaqueteServidor paquete = Util.unpackToServer(trama);
-        
-        conexion.addInQueue(paquete);
+    public void realizarConexion (String uri, CallbackRespuesta response) {
+        Map<String,String> parametros = new HashMap<>();
+        realizarConexion(nick,token,uri,getPaqueteID(),parametros,response);
     }
     
     private String getPaqueteID () {
