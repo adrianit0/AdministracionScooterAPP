@@ -147,7 +147,7 @@ public class Principal extends javax.swing.JFrame {
         Map<String,String> parametros = new HashMap<String,String>();
         
         parametros.put("email", campoEmail.getText());
-        parametros.put("pass", campoPass.getText());
+        parametros.put("pass", Util.getMd5(campoPass.getText()));
         
         botonConectar.setEnabled(false);
         

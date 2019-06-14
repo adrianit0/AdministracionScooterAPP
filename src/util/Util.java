@@ -9,6 +9,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -541,5 +544,22 @@ public class Util {
     // Mejoraría cambiar el cifrado
     public static String crearTokenUsuario () {
         return Integer.toString(Math.abs(Double.toString(Math.random()*Math.random()).hashCode()));
+    }
+    
+    /**
+     * Convierte un texto plano en el cifrado MD5
+     * */
+    public static String getMd5(String input) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] messageDigest = md.digest(input.getBytes());
+            BigInteger no = new BigInteger(1, messageDigest);
+            String hashtext = no.toString(16);
+            while (hashtext.length() < 32)
+                hashtext = "0" + hashtext;
+            return hashtext;
+        } catch (NoSuchAlgorithmException e) {
+            throw new CifrarMD5Exception(e);
+        }
     }
 }
