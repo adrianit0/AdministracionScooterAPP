@@ -454,7 +454,6 @@ public class TestConection extends javax.swing.JFrame {
             }
         }
         
-        
         botonEjecutar.setEnabled(false);
         
         long antes = System.currentTimeMillis();
@@ -523,7 +522,7 @@ public class TestConection extends javax.swing.JFrame {
                 float tiempo = (float)(System.currentTimeMillis() - antes)/1000;
                 textoDuracion.setText("Conexión hecha en "+tiempo+" segundos");
             }
-        });
+        }, false);
         
        
         
@@ -533,7 +532,7 @@ public class TestConection extends javax.swing.JFrame {
         cambiarTextosBasicos ();
         campoURI.setText("login");
         campoParametrosKey.setText("nick\npass");
-        campoParametrosValue.setText("j\nj");
+        campoParametrosValue.setText("j\n363b122c528f54df4a0446b6bab05515");
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
@@ -557,7 +556,7 @@ public class TestConection extends javax.swing.JFrame {
 "nombre\n" +
 "email");
         campoParametrosValue.setText("adrian\n" +
-"1234\n" +
+"81dc9bdb52d04dc20036dbd8313ed055\n" +
 "ramirez\n" +
 "lopez\n" +
 "Adrián\n" +
@@ -593,7 +592,7 @@ public class TestConection extends javax.swing.JFrame {
         cambiarTextosBasicos ();
         campoURI.setText("loginAsAdministrador");
         campoParametrosKey.setText("email\npass");
-        campoParametrosValue.setText("admin\n1234");
+        campoParametrosValue.setText("admin\n81dc9bdb52d04dc20036dbd8313ed055");
     }//GEN-LAST:event_jButton6ActionPerformed
 
     private void cambiarTextosBasicos () {

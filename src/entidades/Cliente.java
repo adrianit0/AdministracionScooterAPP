@@ -1,9 +1,5 @@
 package entidades;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-
 public class Cliente  implements java.io.Serializable {
 
 

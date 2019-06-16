@@ -99,11 +99,15 @@ public class ConectorTCP {
     }
     
     public void realizarConexion (String uri, Map<String,String> parametros, CallbackRespuesta response) {
-        realizarConexion(nick,token,uri,getPaqueteID(),parametros,response);
+        realizarConexion(nick,token,uri,getPaqueteID(),parametros,response, false);
+    }
+    
+    public void realizarConexionPersistente (String uri, Map<String,String> parametros, CallbackRespuesta response) {
+        realizarConexion(nick,token,uri,getPaqueteID(),parametros,response, true);
     }
 
     // Para tests
-    public void realizarConexion (String nick, String token, String uri, String paqueteid, Map<String,String> parametros, CallbackRespuesta response) {
+    public void realizarConexion (String nick, String token, String uri, String paqueteid, Map<String,String> parametros, CallbackRespuesta response, boolean persistente) {
         /*if (!conectado) {
             if (!iniciar ()) {
                 RuntimeException e = new RuntimeException ("No se ha podido realizar la conexión");
@@ -121,13 +125,14 @@ public class ConectorTCP {
         paquete.setArgumentos(parametros);
         paquete.setUri(uri);
         paquete.setCallback(response);
+        paquete.setDestroyable(!persistente);
         
         conexion.addInQueue(paquete);
     }
     
     public void realizarConexion (String uri, CallbackRespuesta response) {
         Map<String,String> parametros = new HashMap<>();
-        realizarConexion(nick,token,uri,getPaqueteID(),parametros,response);
+        realizarConexion(nick,token,uri,getPaqueteID(),parametros,response, false);
     }
     
     private String getPaqueteID () {
@@ -216,6 +221,11 @@ public class ConectorTCP {
         public synchronized PaqueteServidor getPaquete (PaqueteCliente paquete) {
             if (!pendientes.containsKey(paquete.getIdPaquete()))
                 return null;
+            
+            // Es posible que haya conexiones persistentes
+            PaqueteServidor paqueteServidor = pendientes.get(paquete.getIdPaquete());
+            if (!paqueteServidor.isDestroyable())
+                return paqueteServidor;
             
             return pendientes.remove(paquete.getIdPaquete());
         }
