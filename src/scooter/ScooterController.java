@@ -16,9 +16,6 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import static javax.swing.Spring.height;
 import util.CallbackRespuesta;
 import util.Util;
 
@@ -28,7 +25,12 @@ import util.Util;
  */
 public class ScooterController extends Thread {
 
-    public Scooter scooter;
+    final private Scooter scooter;
+    
+    private ScooterEvento evento;
+    
+    private boolean bloqueado;
+    
     private int intentos = 0;
     
     private final int maxIntentos = 10;
@@ -37,8 +39,10 @@ public class ScooterController extends Thread {
     private final int width = 350;
     private final int height = 350;
     
-    public ScooterController (Scooter scooter) {
+    public ScooterController (Scooter scooter, ScooterEvento evento) {
         this.scooter = scooter;
+        this.evento = evento;
+        bloqueado = true;
     }
     
     @Override
@@ -47,6 +51,19 @@ public class ScooterController extends Thread {
         
         // Creamos una imagen Qr en local
         generarImagenQr();
+        crearPaquetesPersistentes();
+    }
+
+    public Scooter getScooter() {
+        return scooter;
+    }
+    
+    public void asignarEvento (ScooterEvento evento) {
+        this.evento = evento;
+    }
+     
+    public void eliminarEvento () {
+        this.evento = null;
     }
     
     private void conectar () {
@@ -100,21 +117,78 @@ public class ScooterController extends Thread {
             // Miramos si ya existe el archivo Qr, para no volver a generar más
             File archivo= new File ("./" + ruta);
             if (archivo.exists()) {
-                System.out.println("El archivo " +archivo.getAbsolutePath()+" actualmente existe, no se volverá a crear." );
+                //System.out.println("El archivo " +archivo.getAbsolutePath()+" actualmente existe, no se volverá a crear." );
                 return;
             }
             QRCodeWriter qrCodeWriter = new QRCodeWriter();
             BitMatrix bitMatrix = qrCodeWriter.encode(texto, BarcodeFormat.QR_CODE, width, height);
 
             Path path = FileSystems.getDefault().getPath(ruta);
-            System.out.println(path.toFile().getAbsoluteFile());
+            //System.out.println(path.toFile().getAbsoluteFile());
             MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
             
             System.out.println("Imagen generado correctamente");
         } catch (WriterException | IOException e) {
             System.err.println("ScooterController::generarImagenQr error: " + e.getMessage());
         }
+    }
+    
+    private void crearPaquetesPersistentes () {
+        ConectorTCP.getInstance().realizarConexionPersistente("desbloquear"+scooter.getCodigo().toString(), new CallbackRespuesta() {
+            @Override
+            public void success(Map<String, String> contenido) {
+                if (evento!=null)
+                    evento.onEventExecute(ScooterEvento.Evento.DESBLOQUEAR);
+                
+                bloqueado=false;
+            }
+            @Override
+            public void error(Map<String, String> contenido, Util.CODIGO codigoError) {
+                System.err.println("Error desbloquear: " + contenido.get("error"));
+            }
+        });
         
+        ConectorTCP.getInstance().realizarConexionPersistente("bloquear"+scooter.getCodigo().toString(), new CallbackRespuesta() {
+            @Override
+            public void success(Map<String, String> contenido) {
+                if (evento!=null)
+                    evento.onEventExecute(ScooterEvento.Evento.BLOQUEAR);
+                
+                bloqueado=true;
+            }
+            @Override
+            public void error(Map<String, String> contenido, Util.CODIGO codigoError) {
+                System.err.println("Error bloquear: " + contenido.get("error"));
+            }
+        });
+        
+        ConectorTCP.getInstance().realizarConexionPersistente("posicion"+scooter.getCodigo().toString(), new CallbackRespuesta() {
+            @Override
+            public void success(Map<String, String> contenido) {
+                if (evento!=null)
+                    evento.onEventExecute(ScooterEvento.Evento.DAR_POSICION);
+                
+                // Enviar la información de posición al servidor
+            }
+            @Override
+            public void error(Map<String, String> contenido, Util.CODIGO codigoError) {
+                System.err.println("Error getPosition: " + contenido.get("error"));
+            }
+        });
+        
+        ConectorTCP.getInstance().realizarConexionPersistente("info"+scooter.getCodigo().toString(), new CallbackRespuesta() {
+            @Override
+            public void success(Map<String, String> contenido) {
+                if (evento!=null)
+                    evento.onEventExecute(ScooterEvento.Evento.DAR_INFO);
+                
+                // Enviar la información del estado de la scooter al servidor
+            }
+            @Override
+            public void error(Map<String, String> contenido, Util.CODIGO codigoError) {
+                System.err.println("Error desbloquear: " + contenido.get("error"));
+            }
+        });
     }
     
     private void ejecutando () {
@@ -127,5 +201,4 @@ public class ScooterController extends Thread {
         
         ejecutando();
     }
-    
 }

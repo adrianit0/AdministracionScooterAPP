@@ -98,25 +98,25 @@ public class ConectorTCP {
         return true;
     }
     
+    public void realizarConexion (String uri, CallbackRespuesta response) {
+        Map<String,String> parametros = new HashMap<>();
+        realizarConexion(nick,token,uri,getPaqueteID(),parametros,response, false);
+    }
+    
     public void realizarConexion (String uri, Map<String,String> parametros, CallbackRespuesta response) {
         realizarConexion(nick,token,uri,getPaqueteID(),parametros,response, false);
     }
     
-    public void realizarConexionPersistente (String uri, Map<String,String> parametros, CallbackRespuesta response) {
-        realizarConexion(nick,token,uri,getPaqueteID(),parametros,response, true);
+    /**
+     * Un paquete persistente no se envia al servidor y se queda esperando a que el servidor responda con
+     * el mismo identificador. Es una manera de tener eventos que se activan al llegar información especial del servidor.
+     */
+    public void realizarConexionPersistente (String identificador, CallbackRespuesta response) {
+        realizarConexion(nick,token,"paquetePersistente",identificador,null,response, true);
     }
 
     // Para tests
     public void realizarConexion (String nick, String token, String uri, String paqueteid, Map<String,String> parametros, CallbackRespuesta response, boolean persistente) {
-        /*if (!conectado) {
-            if (!iniciar ()) {
-                RuntimeException e = new RuntimeException ("No se ha podido realizar la conexión");
-                parametros.put("error", e.getMessage());
-                response.error(parametros, Util.CODIGO.notConnection);
-                throw e;
-            }
-        }*/
-            
         // Ponemos los valores para realizar la conexión
         PaqueteServidor paquete = new PaqueteServidor();
         paquete.setIdPaquete(paqueteid);
@@ -128,11 +128,6 @@ public class ConectorTCP {
         paquete.setDestroyable(!persistente);
         
         conexion.addInQueue(paquete);
-    }
-    
-    public void realizarConexion (String uri, CallbackRespuesta response) {
-        Map<String,String> parametros = new HashMap<>();
-        realizarConexion(nick,token,uri,getPaqueteID(),parametros,response, false);
     }
     
     private String getPaqueteID () {
@@ -244,10 +239,14 @@ public class ConectorTCP {
                     // Preguntamos si hay paquetes en cola para enviar
                     if (out!=null && hayPaqueteEnCola()) {
                         PaqueteServidor paquete = enCola.remove(0);
-                        String request = Util.packFromServer(paquete);
                         
-                        // Le envio la info al servidor
-                       out.println(request);
+                        // Solo lo enviamos si el paquete no es persistente
+                        if (paquete.isDestroyable()) {
+                            String request = Util.packFromServer(paquete);
+                        
+                            // Le envio la info al servidor
+                           out.println(request);
+                        }
 
                        pendientes.put(paquete.getIdPaquete(), paquete);
                     }

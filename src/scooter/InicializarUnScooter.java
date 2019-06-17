@@ -26,7 +26,7 @@ public class InicializarUnScooter {
         scooter.setLatitud(36.510960f);
         scooter.setLongitud(-6.278162f);
         
-        ScooterController controlador = new ScooterController (scooter);
+        ScooterController controlador = new ScooterController (scooter, null);
         controlador.start();
     }
 }
