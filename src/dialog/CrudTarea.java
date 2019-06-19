@@ -6,7 +6,8 @@
 package dialog;
 
 import conexion.ConectorTCP;
-import entidades.Empleado;
+import entidades.Tarea;
+import java.sql.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import principal.PaneEdiccion;
 import principal.PanelEmpleados;
+import principal.PanelTareas;
 import util.CallbackRespuesta;
 import util.ItemReducido;
 import util.Util;
@@ -24,41 +26,39 @@ import util.Util;
  *
  * @author agarcia.gonzalez
  */
-public class CrudEmpleado extends javax.swing.JDialog {
+public class CrudTarea extends javax.swing.JDialog {
 
     private boolean esEditar;
-    private PanelEmpleados empleados;
+    private PanelTareas panelTareas;
     
-    private List ciudades;
-    private List sedes;
-    private List puestos;
+    private List empleadoList;
+    private List tipoTareas;
+    private List estadoTareas;
     
     private PaneEdiccion paneEdiccion;
     
     /**
      * Creates new form CrudEmpleado
      */
-    public CrudEmpleado(java.awt.Frame parent, PanelEmpleados panelEmpleados, boolean modal, boolean esEditar, int id) {
+    public CrudTarea(java.awt.Frame parent, PanelTareas panelTareas, boolean modal, boolean esEditar, int id) {
         super(parent, modal);
         initComponents();
         
         this.esEditar = esEditar;
-        this.empleados = panelEmpleados;
+        this.panelTareas = panelTareas;
         
         campoId.setEnabled(false);
-        textoPass.setEnabled(!esEditar);
-        textoPass.setEditable(!esEditar);
         
-        textoTitulo.setText(esEditar ? "Editar empleado" : "Nuevo empleado");
+        textoTitulo.setText(esEditar ? "Editar tarea" : "Nueva tarea");
         
         paneEdiccion = (PaneEdiccion) parent;
-        ciudades = paneEdiccion.getCiudades();
-        sedes = paneEdiccion.getSedes();
-        puestos = paneEdiccion.getPuestos();
+        empleadoList = paneEdiccion.getEmpleados();
+        tipoTareas = paneEdiccion.getTipoTareas();
+        estadoTareas = paneEdiccion.getEstadoTareas();
         
-        rellenarComboBox (comboCiudad, ciudades);
-        rellenarComboBox (comboSede, sedes);
-        rellenarComboBox (comboPuesto, puestos);
+        rellenarComboBox (comboEmpleado, empleadoList);
+        rellenarComboBox (comboTipoTarea, tipoTareas);
+        rellenarComboBox (comboEstadoTarea, estadoTareas);
         
         this.setLocationRelativeTo(null);
         
@@ -69,31 +69,26 @@ public class CrudEmpleado extends javax.swing.JDialog {
             Map<String,String> parametros = new HashMap<>();
             parametros.put("id", id+"");
 
-            ConectorTCP.getInstance().realizarConexion("getEmpleado", parametros, new CallbackRespuesta(){
+            ConectorTCP.getInstance().realizarConexion("getTarea", parametros, new CallbackRespuesta(){
                 @Override
                 public void success(Map<String, String> contenido) {
                     campoId.setText(contenido.get("id"));
                     textoNombre.setText(contenido.get("nombre"));
-                    textoApellido1.setText(contenido.get("apellido1"));
-                    textoApellido2.setText(contenido.get("apellido2"));
-                    textoPass.setText("");
-                    textoDireccion.setText(contenido.get("direccion"));
-                    textoSueldo.setText(contenido.get("sueldo"));
-                    textoEmail.setText(contenido.get("email"));
-                    textoDNI.setText(contenido.get("dni"));
+                    textoObservacion.setText(contenido.get("observacion"));
+                    Date fechaAsignacion = new Date(Long.parseLong(contenido.get("fechaAsignacion")));
+                    datePicker.setValue(fechaAsignacion);
+                    textoEstimacion.setText(contenido.get("estimacion"));
                     
-                    seleccionarValorCombo(comboCiudad, ciudades, Integer.parseInt(contenido.get("ciudad")));
-                    seleccionarValorCombo(comboPuesto, puestos, Integer.parseInt(contenido.get("puesto")));
-                    seleccionarValorCombo(comboSede, sedes, Integer.parseInt(contenido.get("sede")));
+                    seleccionarValorCombo(comboEmpleado, empleadoList, Integer.parseInt(contenido.get("empleadoId")));
+                    seleccionarValorCombo(comboTipoTarea, tipoTareas, Integer.parseInt(contenido.get("tipoTareaId")));
+                    seleccionarValorCombo(comboEstadoTarea, estadoTareas, Integer.parseInt(contenido.get("estadoTareaId")));
 
                     botonAceptar.setEnabled(true);
-                    
-                    empleados.actualizarTabla();
                 }
 
                 @Override
                 public void error(Map<String, String> contenido, Util.CODIGO codigoError) {
-                    JOptionPane.showMessageDialog(null, "No se ha cargado al empleado con ID " + id);
+                    JOptionPane.showMessageDialog(null, "No se ha cargado la tarea con ID " + id);
                 }
             });
         }
@@ -127,26 +122,26 @@ public class CrudEmpleado extends javax.swing.JDialog {
     }
     
     public void aceptar() {
-        Empleado empleado = convertirEnEmpleado();
+        Tarea tarea = convertirEnTarea();
         
-        Map<String,String> parametros = util.Util.convertObjectToMap(empleado);
-        Integer ciudadId = seleccionarKeyCombo(comboCiudad, ciudades);
-        Integer sedeId = seleccionarKeyCombo(comboSede, sedes);
-        Integer puestoId = seleccionarKeyCombo(comboPuesto, puestos);
-        if (ciudadId!=null)
-            parametros.put("ciudadId",  ciudadId.toString());
-        if (sedeId!=null)
-            parametros.put("sedeId", sedeId.toString());
-        if (puestoId!=null)
-            parametros.put("puestoId", puestoId.toString());
+        Map<String,String> parametros = util.Util.convertObjectToMap(tarea);
+        Integer tipoTareaId = seleccionarKeyCombo(comboTipoTarea, tipoTareas);
+        Integer estadoTareaId = seleccionarKeyCombo(comboEstadoTarea, estadoTareas);
+        Integer empleadoId = seleccionarKeyCombo(comboEmpleado, empleadoList);
+        if (tipoTareaId!=null)
+            parametros.put("tipoTareaId",  tipoTareaId.toString());
+        if (estadoTareaId!=null)
+            parametros.put("estadoTareaId", estadoTareaId.toString());
+        if (empleadoId!=null)
+            parametros.put("empleadoId", empleadoId.toString());
         
-        String uri = esEditar ? "updateEmpleado" : "createEmpleado";
+        String uri = esEditar ? "updateTarea" : "createTarea";
         
         ConectorTCP.getInstance().realizarConexion(uri, parametros, new CallbackRespuesta() {
             @Override
             public void success(Map<String, String> contenido) {
-                JOptionPane.showMessageDialog(null, esEditar ? "El empleado se ha modificado correctamente" : "El empleado se ha creado correctamente");
-                empleados.actualizarTabla();
+                JOptionPane.showMessageDialog(null, esEditar ? "La tarea se ha modificado correctamente" : "La tarea se ha creado correctamente");
+                panelTareas.actualizarTabla();
                 cerrar();
             }
 
@@ -162,21 +157,19 @@ public class CrudEmpleado extends javax.swing.JDialog {
         this.dispose();
     }
     
-    private Empleado convertirEnEmpleado () {
-        Empleado empleado = new Empleado ();
+    private Tarea convertirEnTarea () {
+        Tarea tarea = new Tarea ();
         
         if (campoId.getText()!=null && !campoId.getText().isEmpty())
-            empleado.setId(Integer.parseInt(campoId.getText()));
-        empleado.setNombre(textoNombre.getText());
-        empleado.setApellido1(textoApellido1.getText());
-        empleado.setApellido2(textoApellido2.getText());
-        empleado.setPass(util.Util.getMd5(textoPass.getText()));
-        empleado.setDireccion(textoDireccion.getText());
-        empleado.setSueldo(Double.parseDouble(textoSueldo.getText()));
-        empleado.setEmail(textoEmail.getText());
-        empleado.setDni(textoDNI.getText());
+            tarea.setId(Integer.parseInt(campoId.getText()));
+        tarea.setNombre(textoNombre.getText());
+        tarea.setObservaciones(textoObservacion.getText());
+        tarea.setEstimacion(Integer.parseInt(textoEstimacion.getText()));
+        java.util.Date fechaAsignacion = (java.util.Date) datePicker.getValue();
+        if (fechaAsignacion!=null)
+            tarea.setFechaAsignacion(fechaAsignacion.getTime());
         
-        return empleado;
+        return tarea;
     }
     
     
@@ -197,32 +190,24 @@ public class CrudEmpleado extends javax.swing.JDialog {
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
-        jLabel7 = new javax.swing.JLabel();
-        jLabel8 = new javax.swing.JLabel();
-        jLabel9 = new javax.swing.JLabel();
-        jLabel10 = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
         jLabel12 = new javax.swing.JLabel();
         jLabel13 = new javax.swing.JLabel();
         botonAceptar = new javax.swing.JButton();
         botonCancelar = new javax.swing.JButton();
         textoNombre = new javax.swing.JTextField();
-        textoApellido1 = new javax.swing.JTextField();
-        textoApellido2 = new javax.swing.JTextField();
-        textoDNI = new javax.swing.JTextField();
-        textoDireccion = new javax.swing.JTextField();
-        textoEmail = new javax.swing.JTextField();
-        textoPass = new javax.swing.JTextField();
-        textoSueldo = new javax.swing.JTextField();
-        comboPuesto = new javax.swing.JComboBox<>();
-        comboCiudad = new javax.swing.JComboBox<>();
-        comboSede = new javax.swing.JComboBox<>();
+        textoObservacion = new javax.swing.JTextField();
+        textoEstimacion = new javax.swing.JTextField();
+        comboEmpleado = new javax.swing.JComboBox<>();
+        comboTipoTarea = new javax.swing.JComboBox<>();
+        comboEstadoTarea = new javax.swing.JComboBox<>();
+        datePicker = new javax.swing.JSpinner();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
         textoTitulo.setFont(new java.awt.Font("Tahoma", 1, 18)); // NOI18N
         textoTitulo.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        textoTitulo.setText("Editar empleado");
+        textoTitulo.setText("Editar tarea");
 
         jLabel2.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
@@ -236,43 +221,27 @@ public class CrudEmpleado extends javax.swing.JDialog {
 
         jLabel4.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel4.setText("Apellido 1:");
+        jLabel4.setText("Observaciones:");
 
         jLabel5.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel5.setText("Apellido 2:");
+        jLabel5.setText("Fecha asignación:");
 
         jLabel6.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel6.setText("DNI:");
-
-        jLabel7.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        jLabel7.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel7.setText("Dirección:");
-
-        jLabel8.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel8.setText("Email:");
-
-        jLabel9.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        jLabel9.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel9.setText("Pass:");
-
-        jLabel10.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
-        jLabel10.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel10.setText("Sueldo:");
+        jLabel6.setText("Estimación:");
 
         jLabel11.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         jLabel11.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel11.setText("Puesto:");
+        jLabel11.setText("Empleado:");
 
         jLabel12.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         jLabel12.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel12.setText("Ciudad:");
+        jLabel12.setText("Tipo tarea:");
 
         jLabel13.setFont(new java.awt.Font("Tahoma", 1, 11)); // NOI18N
         jLabel13.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        jLabel13.setText("Sede:");
+        jLabel13.setText("Estado tarea:");
 
         botonAceptar.setText("Aceptar");
         botonAceptar.addActionListener(new java.awt.event.ActionListener() {
@@ -288,16 +257,16 @@ public class CrudEmpleado extends javax.swing.JDialog {
             }
         });
 
-        textoPass.setEditable(false);
+        comboEmpleado.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Descnonocido" }));
+        comboEmpleado.setEnabled(false);
 
-        comboPuesto.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Descnonocido" }));
-        comboPuesto.setEnabled(false);
+        comboTipoTarea.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Descnonocido" }));
+        comboTipoTarea.setEnabled(false);
 
-        comboCiudad.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Descnonocido" }));
-        comboCiudad.setEnabled(false);
+        comboEstadoTarea.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Descnonocido" }));
+        comboEstadoTarea.setEnabled(false);
 
-        comboSede.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Descnonocido" }));
-        comboSede.setEnabled(false);
+        datePicker.setModel(new javax.swing.SpinnerDateModel());
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -318,43 +287,27 @@ public class CrudEmpleado extends javax.swing.JDialog {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(10, 10, 10)
-                        .addComponent(textoApellido1))
+                        .addComponent(textoObservacion))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(10, 10, 10)
-                        .addComponent(textoApellido2))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(datePicker))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel6, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(10, 10, 10)
-                        .addComponent(textoDNI))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(10, 10, 10)
-                        .addComponent(textoDireccion))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(10, 10, 10)
-                        .addComponent(textoEmail))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel9, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(10, 10, 10)
-                        .addComponent(textoPass))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(10, 10, 10)
-                        .addComponent(textoSueldo))
+                        .addComponent(textoEstimacion))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(comboPuesto, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(comboEmpleado, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(10, 10, 10)
-                        .addComponent(comboCiudad, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(comboTipoTarea, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 101, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(10, 10, 10)
-                        .addComponent(comboSede, 0, 249, Short.MAX_VALUE))
+                        .addComponent(comboEstadoTarea, 0, 249, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(botonCancelar, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -379,44 +332,28 @@ public class CrudEmpleado extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
-                    .addComponent(textoApellido1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(textoObservacion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
-                    .addComponent(textoApellido2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(datePicker, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel6)
-                    .addComponent(textoDNI, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel7)
-                    .addComponent(textoDireccion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel8)
-                    .addComponent(textoEmail, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel9)
-                    .addComponent(textoPass, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel10)
-                    .addComponent(textoSueldo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(textoEstimacion, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel11)
-                    .addComponent(comboPuesto, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(comboEmpleado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel12)
-                    .addComponent(comboCiudad, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(comboTipoTarea, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel13)
-                    .addComponent(comboSede, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 24, Short.MAX_VALUE)
+                    .addComponent(comboEstadoTarea, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 34, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(botonAceptar)
                     .addComponent(botonCancelar))
@@ -439,10 +376,10 @@ public class CrudEmpleado extends javax.swing.JDialog {
     private javax.swing.JButton botonAceptar;
     private javax.swing.JButton botonCancelar;
     private javax.swing.JTextField campoId;
-    private javax.swing.JComboBox<String> comboCiudad;
-    private javax.swing.JComboBox<String> comboPuesto;
-    private javax.swing.JComboBox<String> comboSede;
-    private javax.swing.JLabel jLabel10;
+    private javax.swing.JComboBox<String> comboEmpleado;
+    private javax.swing.JComboBox<String> comboEstadoTarea;
+    private javax.swing.JComboBox<String> comboTipoTarea;
+    private javax.swing.JSpinner datePicker;
     private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
@@ -451,17 +388,9 @@ public class CrudEmpleado extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
-    private javax.swing.JTextField textoApellido1;
-    private javax.swing.JTextField textoApellido2;
-    private javax.swing.JTextField textoDNI;
-    private javax.swing.JTextField textoDireccion;
-    private javax.swing.JTextField textoEmail;
+    private javax.swing.JTextField textoEstimacion;
     private javax.swing.JTextField textoNombre;
-    private javax.swing.JTextField textoPass;
-    private javax.swing.JTextField textoSueldo;
+    private javax.swing.JTextField textoObservacion;
     private javax.swing.JLabel textoTitulo;
     // End of variables declaration//GEN-END:variables
 }

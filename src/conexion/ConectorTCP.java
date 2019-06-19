@@ -79,7 +79,7 @@ public class ConectorTCP {
         outMessage = "No se puede construir la trama de datos de salida";
     }
     
-    public synchronized static ConectorTCP getInstance () {
+    public static ConectorTCP getInstance () {
         if (instance==null) {
             iniciarServidor ();
         }
@@ -87,7 +87,7 @@ public class ConectorTCP {
         return instance;
     }
     
-    public synchronized static boolean iniciarServidor () {
+    public static boolean iniciarServidor () {
         try {
             instance=new ConectorTCP();
         } catch (Exception e) {
@@ -98,12 +98,12 @@ public class ConectorTCP {
         return true;
     }
     
-    public synchronized void realizarConexion (String uri, CallbackRespuesta response) {
+    public void realizarConexion (String uri, CallbackRespuesta response) {
         Map<String,String> parametros = new HashMap<>();
         realizarConexion(nick,token,uri,getPaqueteID(),parametros,response, false);
     }
     
-    public synchronized void realizarConexion (String uri, Map<String,String> parametros, CallbackRespuesta response) {
+    public void realizarConexion (String uri, Map<String,String> parametros, CallbackRespuesta response) {
         realizarConexion(nick,token,uri,getPaqueteID(),parametros,response, false);
     }
     
@@ -111,13 +111,13 @@ public class ConectorTCP {
      * Un paquete persistente no se envia al servidor y se queda esperando a que el servidor responda con
      * el mismo identificador. Es una manera de tener eventos que se activan al llegar información especial del servidor.
      */
-    public synchronized void realizarConexionPersistente (String identificador, CallbackRespuesta response) {
+    public void realizarConexionPersistente (String identificador, CallbackRespuesta response) {
         realizarConexion(nick,token,"paquetePersistente",identificador,null,response, true);
         System.out.println("Añadida conexión persistente " + identificador + " con el servidor");
     }
 
     // Para tests
-    public synchronized void realizarConexion (String nick, String token, String uri, String paqueteid, Map<String,String> parametros, CallbackRespuesta response, boolean persistente) {
+    public void realizarConexion (String nick, String token, String uri, String paqueteid, Map<String,String> parametros, CallbackRespuesta response, boolean persistente) {
         // Ponemos los valores para realizar la conexión
         PaqueteServidor paquete = new PaqueteServidor();
         paquete.setIdPaquete(paqueteid);
@@ -192,7 +192,7 @@ public class ConectorTCP {
             iniciar();
         }
         
-        private synchronized boolean iniciar() {
+        private boolean iniciar() {
             try {
                 echoSocket = new Socket(hostServerName, port);
                 out = new PrintWriter(echoSocket.getOutputStream(), true);
@@ -254,8 +254,6 @@ public class ConectorTCP {
                     if (in!=null && in.ready()) {
                         String respuesta = in.readLine();
                         
-                        System.out.println("Respuesta -> " + respuesta);
-
                         PaqueteCliente paqueteCliente = Util.unpackToCliente(respuesta);
 
                         if (paqueteCliente!=null) {

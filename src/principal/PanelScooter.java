@@ -124,7 +124,7 @@ public class PanelScooter extends javax.swing.JDialog {
         });
 
         botonEliminar.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        botonEliminar.setText("Eliminar scooter");
+        botonEliminar.setText("Dar Baja scooter");
         botonEliminar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 botonEliminarActionPerformed(evt);
@@ -184,7 +184,7 @@ public class PanelScooter extends javax.swing.JDialog {
     }//GEN-LAST:event_botonEditarActionPerformed
 
     private void botonEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonEliminarActionPerformed
-        eliminarScooter();
+        darBajaScooter();
     }//GEN-LAST:event_botonEliminarActionPerformed
 
     private void abrirEdiccionScooter() {
@@ -204,11 +204,11 @@ public class PanelScooter extends javax.swing.JDialog {
         }
     }
     
-    private void eliminarScooter () {
+    private void darBajaScooter () {
         int id = tablaScooter.getSelectedRow();
         
         if (id>=0) {
-            int eleccion = JOptionPane.showConfirmDialog(parent, "Quieres eliminar esta scooter?");
+            int eleccion = JOptionPane.showConfirmDialog(parent, "Quieres dar de baja esta scooter?");
             if (eleccion==0) {
                 String rowId = tablaScooter.getValueAt(id, 0).toString();
             
@@ -217,16 +217,16 @@ public class PanelScooter extends javax.swing.JDialog {
                 Map<String,String> parametros = new HashMap<String,String>();
                 parametros.put("id", seleccionado+"");
                 
-                ConectorTCP.getInstance().realizarConexion("deleteScooter", parametros, new CallbackRespuesta() {
+                ConectorTCP.getInstance().realizarConexion("bajaScooter", parametros, new CallbackRespuesta() {
                     @Override
                     public void success(Map<String, String> contenido) {
-                        JOptionPane.showMessageDialog(null, "Se ha eliminado la scooter");
+                        JOptionPane.showMessageDialog(null, "Se ha dado de baja la scooter");
                         actualizarTabla();
                     }
 
                     @Override
                     public void error(Map<String, String> contenido, Util.CODIGO codigoError) {
-                        JOptionPane.showMessageDialog(null, "No se ha podido eliminar la scooter: " + contenido.get("error"));
+                        JOptionPane.showMessageDialog(null, "No se ha podido dar de baja la scooter: " + contenido.get("error"));
                     }
                     
                 });

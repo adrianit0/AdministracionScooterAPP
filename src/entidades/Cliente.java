@@ -1,6 +1,6 @@
 package entidades;
 
-public class Cliente  implements java.io.Serializable {
+public class Cliente {
 
 
      private Integer id;

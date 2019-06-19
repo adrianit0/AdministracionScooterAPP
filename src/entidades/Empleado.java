@@ -1,13 +1,8 @@
 package entidades;
-// Generated 28-abr-2019 23:19:03 by Hibernate Tools 4.3.1
 
+import util.ItemReducido;
 
-import java.util.HashSet;
-import java.util.Set;
-
-
-public class Empleado  implements java.io.Serializable {
-
+public class Empleado implements ItemReducido{
 
      private Integer id;
      private String nombre;
@@ -18,8 +13,6 @@ public class Empleado  implements java.io.Serializable {
      private String email;
      private String pass;
      private double sueldo;
-     private Set tareas = new HashSet(0);
-     private Set horarios = new HashSet(0);
 
     public Empleado() {
     }
@@ -34,7 +27,7 @@ public class Empleado  implements java.io.Serializable {
         this.pass = pass;
         this.sueldo = sueldo;
     }
-    public Empleado(String nombre, String apellido1, String apellido2, String dni, String direccion, String email, String pass, double sueldo, Set tareas, Set horarios) {
+    public Empleado(String nombre, String apellido1, String apellido2, String dni, String direccion, String email, String pass, double sueldo) {
 
        this.nombre = nombre;
        this.apellido1 = apellido1;
@@ -44,8 +37,6 @@ public class Empleado  implements java.io.Serializable {
        this.email = email;
        this.pass = pass;
        this.sueldo = sueldo;
-       this.tareas = tareas;
-       this.horarios = horarios;
     }
    
     public Integer getId() {
@@ -111,24 +102,23 @@ public class Empleado  implements java.io.Serializable {
     public void setSueldo(double sueldo) {
         this.sueldo = sueldo;
     }
-    public Set getTareas() {
-        return this.tareas;
+    
+    public String getNombreCompleto () {
+        return nombre + " " + apellido1 + " " + (apellido2==null||apellido2.equals("null")?"":apellido2);
     }
     
-    public void setTareas(Set tareas) {
-        this.tareas = tareas;
-    }
-    public Set getHorarios() {
-        return this.horarios;
-    }
-    
-    public void setHorarios(Set horarios) {
-        this.horarios = horarios;
+    @Override
+    public String toString() {
+        return getNombreCompleto();
     }
 
+    @Override
+    public int getIndex() {
+        return id;
+    }
 
-
-
+    @Override
+    public String getValue() {
+        return toString();
+    }
 }
-
-

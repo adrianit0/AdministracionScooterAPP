@@ -1,33 +1,28 @@
-package entidades;
+package itemReducido;
+
 
 import java.util.HashSet;
 import java.util.Set;
 import util.ItemReducido;
 
-public class Sede  implements ItemReducido {
+public class Puesto  implements ItemReducido {
 
 
      private Integer id;
-     private Ciudad ciudad;
      private String nombre;
-     private String direccion;
-     private Set scooters = new HashSet(0);
+     private String descripcion;
      private Set empleados = new HashSet(0);
 
-    public Sede() {
+    public Puesto() {
     }
 
 	
-    public Sede(Ciudad ciudad, String nombre, String direccion) {
-        this.ciudad = ciudad;
+    public Puesto(String nombre) {
         this.nombre = nombre;
-        this.direccion = direccion;
     }
-    public Sede(Ciudad ciudad, String nombre, String direccion, Set scooters, Set empleados) {
-       this.ciudad = ciudad;
+    public Puesto(String nombre, String descripcion, Set empleados) {
        this.nombre = nombre;
-       this.direccion = direccion;
-       this.scooters = scooters;
+       this.descripcion = descripcion;
        this.empleados = empleados;
     }
    
@@ -38,13 +33,6 @@ public class Sede  implements ItemReducido {
     public void setId(Integer id) {
         this.id = id;
     }
-    public Ciudad getCiudad() {
-        return this.ciudad;
-    }
-    
-    public void setCiudad(Ciudad ciudad) {
-        this.ciudad = ciudad;
-    }
     public String getNombre() {
         return this.nombre;
     }
@@ -52,19 +40,12 @@ public class Sede  implements ItemReducido {
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
-    public String getDireccion() {
-        return this.direccion;
+    public String getDescripcion() {
+        return this.descripcion;
     }
     
-    public void setDireccion(String direccion) {
-        this.direccion = direccion;
-    }
-    public Set getScooters() {
-        return this.scooters;
-    }
-    
-    public void setScooters(Set scooters) {
-        this.scooters = scooters;
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
     }
     public Set getEmpleados() {
         return this.empleados;
@@ -78,7 +59,7 @@ public class Sede  implements ItemReducido {
     public String toString() {
         return nombre; 
     }
-
+    
     @Override
     public int getIndex() {
         return id;
@@ -88,6 +69,7 @@ public class Sede  implements ItemReducido {
     public String getValue() {
         return toString();
     }
+
 
 }
 

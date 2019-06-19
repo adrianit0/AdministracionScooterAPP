@@ -1,26 +1,23 @@
-package entidades;
+package itemReducido;
 
-import java.util.Set;
 import util.ItemReducido;
 
-public class Ciudad  implements ItemReducido {
+public class Estadotarea implements ItemReducido {
 
 
      private Integer id;
      private String nombre;
-     private String provincia;
-
-    public Ciudad() {
+     
+    public Estadotarea() {
+    }
+    
+    public Estadotarea(Integer id){
+        this.id=id;
     }
 
 	
-    public Ciudad(String nombre, String provincia) {
+    public Estadotarea(String nombre) {
         this.nombre = nombre;
-        this.provincia = provincia;
-    }
-    public Ciudad(String nombre, String provincia, Set sedes, Set empleados) {
-       this.nombre = nombre;
-       this.provincia = provincia;
     }
    
     public Integer getId() {
@@ -30,6 +27,7 @@ public class Ciudad  implements ItemReducido {
     public void setId(Integer id) {
         this.id = id;
     }
+    
     public String getNombre() {
         return this.nombre;
     }
@@ -37,17 +35,10 @@ public class Ciudad  implements ItemReducido {
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
-    public String getProvincia() {
-        return this.provincia;
-    }
     
-    public void setProvincia(String provincia) {
-        this.provincia = provincia;
-    }
-
     @Override
     public String toString() {
-        return nombre; 
+        return nombre;
     }
 
     @Override
@@ -59,8 +50,4 @@ public class Ciudad  implements ItemReducido {
     public String getValue() {
         return toString();
     }
-    
-    
 }
-
-

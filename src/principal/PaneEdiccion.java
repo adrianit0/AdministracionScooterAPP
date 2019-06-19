@@ -6,11 +6,10 @@
 package principal;
 
 import conexion.ConectorTCP;
-import entidades.Ciudad;
 import entidades.Empleado;
-import entidades.Modelo;
-import entidades.Puesto;
-import entidades.Sede;
+import itemReducido.Ciudad;
+import entidades.Tarea;
+import itemReducido.*;
 import java.awt.Frame;
 import java.awt.MouseInfo;
 import static java.awt.MouseInfo.getPointerInfo;
@@ -48,9 +47,12 @@ public class PaneEdiccion extends javax.swing.JFrame {
     private List<Puesto> puestos;
     private List<Sede> sedes;
     private List<Modelo> modelos;
+    private List<Empleado> empleados;
+    private List<Tipotarea> tipoTareas;
+    private List<Estadotarea> estadoTareas;
     
     // Empleados
-    private Map<Integer,Empleado> empleados;
+    private Map<Integer,Tarea> tareas;
     
     private List<JPanel> paneles;
     
@@ -131,6 +133,43 @@ public class PaneEdiccion extends javax.swing.JFrame {
                 System.err.println("No se han podido coger los modelos de las Scooters. " + contenido.get("error"));
             }
         });
+        
+        server.realizarConexion ("getEstadoTareas", new CallbackRespuesta() {
+            @Override
+            public void success(Map<String, String> contenido) {
+                estadoTareas = util.Util.convertMapToList(Estadotarea.class, contenido);
+            }
+
+            @Override
+            public void error(Map<String, String> contenido, Util.CODIGO codigoError) {
+                System.err.println("No se han podido coger los estados de las tareas de las Scooters. " + contenido.get("error"));
+            }
+        });
+        
+        server.realizarConexion ("getTipoTareas", new CallbackRespuesta() {
+            @Override
+            public void success(Map<String, String> contenido) {
+                tipoTareas = util.Util.convertMapToList(Tipotarea.class, contenido);
+            }
+
+            @Override
+            public void error(Map<String, String> contenido, Util.CODIGO codigoError) {
+                System.err.println("No se han podido coger los tipo de las tareas. " + contenido.get("error"));
+            }
+        });
+        
+        server.realizarConexion ("getEmpleados", new CallbackRespuesta() {
+            @Override
+            public void success(Map<String, String> contenido) {
+                empleados = util.Util.convertMapToList(Empleado.class, contenido);
+            }
+
+            @Override
+            public void error(Map<String, String> contenido, Util.CODIGO codigoError) {
+                System.err.println("No se han podido coger los empleados. " + contenido.get("error"));
+            }
+        });
+        
     }
     
     public void addRowToTable (DefaultTableModel modelFactura, Object[] contenido) {
@@ -157,6 +196,7 @@ public class PaneEdiccion extends javax.swing.JFrame {
         botonBonos = new javax.swing.JButton();
         jLabel7 = new javax.swing.JLabel();
         botonCliente = new javax.swing.JButton();
+        botonTarea = new javax.swing.JButton();
         jLayeredPane1 = new javax.swing.JLayeredPane();
         panelInicio = new javax.swing.JPanel();
         jPanel3 = new javax.swing.JPanel();
@@ -222,7 +262,7 @@ public class PaneEdiccion extends javax.swing.JFrame {
         jLabel1.setFont(new java.awt.Font("Tahoma", 1, 10)); // NOI18N
         jLabel1.setForeground(new java.awt.Color(255, 255, 255));
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("Versión 1.0.11");
+        jLabel1.setText("Versión 1.0.14");
 
         botonBonos.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         botonBonos.setText("Bonos");
@@ -238,10 +278,18 @@ public class PaneEdiccion extends javax.swing.JFrame {
         jLabel7.setText("Inicio");
 
         botonCliente.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
-        botonCliente.setText("Cliente");
+        botonCliente.setText("Clientes");
         botonCliente.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 botonClienteActionPerformed(evt);
+            }
+        });
+
+        botonTarea.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
+        botonTarea.setText("Tareas");
+        botonTarea.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                botonTareaActionPerformed(evt);
             }
         });
 
@@ -262,7 +310,8 @@ public class PaneEdiccion extends javax.swing.JFrame {
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGap(10, 10, 10)
                         .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(botonCliente, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(botonCliente, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(botonTarea, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(0, 0, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
@@ -278,6 +327,8 @@ public class PaneEdiccion extends javax.swing.JFrame {
                 .addComponent(botonBonos, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(botonCliente, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(botonTarea, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -310,7 +361,7 @@ public class PaneEdiccion extends javax.swing.JFrame {
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 673, Short.MAX_VALUE)
+                .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, 691, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel3Layout.setVerticalGroup(
@@ -374,7 +425,7 @@ public class PaneEdiccion extends javax.swing.JFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(16, 16, 16)
+                .addGap(18, 18, 18)
                 .addComponent(panelInicio, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jLayeredPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -421,6 +472,10 @@ public class PaneEdiccion extends javax.swing.JFrame {
         botonCliente();
     }//GEN-LAST:event_botonClienteActionPerformed
 
+    private void botonTareaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_botonTareaActionPerformed
+        botonTareas();
+    }//GEN-LAST:event_botonTareaActionPerformed
+
     private void botonInicio() {
         changeTab(0);
     }
@@ -442,6 +497,11 @@ public class PaneEdiccion extends javax.swing.JFrame {
     
     private void botonBonos () {
         PanelBonos panel = new PanelBonos (this, true);
+        panel.setVisible(true);
+    }
+    
+    private void botonTareas () {
+        PanelTareas panel = new PanelTareas(this, true);
         panel.setVisible(true);
     }
     
@@ -491,12 +551,39 @@ public class PaneEdiccion extends javax.swing.JFrame {
     public void setSedes(List<Sede> sedes) {
         this.sedes = sedes;
     }
+
+    public List<Empleado> getEmpleados() {
+        return empleados;
+    }
+
+    public void setEmpleados(List<Empleado> empleados) {
+        this.empleados = empleados;
+    }
+
+    public List<Tipotarea> getTipoTareas() {
+        return tipoTareas;
+    }
+
+    public void setTipoTareas(List<Tipotarea> tipoTareas) {
+        this.tipoTareas = tipoTareas;
+    }
+
+    public List<Estadotarea> getEstadoTareas() {
+        return estadoTareas;
+    }
+
+    public void setEstadoTareas(List<Estadotarea> estadoTareas) {
+        this.estadoTareas = estadoTareas;
+    }
+    
+    
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton botonBonos;
     private javax.swing.JButton botonCliente;
     private javax.swing.JButton botonEmpleado;
     private javax.swing.JButton botonScooter;
+    private javax.swing.JButton botonTarea;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -513,35 +600,4 @@ public class PaneEdiccion extends javax.swing.JFrame {
     private javax.swing.JTable tablaFacturas;
     // End of variables declaration//GEN-END:variables
 
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(Principal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(Principal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(Principal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(Principal.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new PaneEdiccion(null, "adrian", "1234").setVisible(true);
-            }
-        });
-    }
 }

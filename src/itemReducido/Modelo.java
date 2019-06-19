@@ -1,9 +1,9 @@
-package entidades;
+package itemReducido;
 
 import util.ItemReducido;
 
 
-public class Modelo  implements ItemReducido {
+public class Modelo implements ItemReducido {
 
 
      private Integer id;

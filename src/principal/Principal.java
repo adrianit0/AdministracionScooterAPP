@@ -11,7 +11,6 @@ import java.util.Map;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import util.CallbackRespuesta;
-import util.Paquete;
 import util.Util;
 
 /**

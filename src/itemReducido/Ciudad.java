@@ -1,29 +1,26 @@
-package entidades;
+package itemReducido;
 
-
-import java.util.HashSet;
 import java.util.Set;
 import util.ItemReducido;
 
-public class Puesto  implements ItemReducido {
+public class Ciudad  implements ItemReducido {
 
 
      private Integer id;
      private String nombre;
-     private String descripcion;
-     private Set empleados = new HashSet(0);
+     private String provincia;
 
-    public Puesto() {
+    public Ciudad() {
     }
 
 	
-    public Puesto(String nombre) {
+    public Ciudad(String nombre, String provincia) {
         this.nombre = nombre;
+        this.provincia = provincia;
     }
-    public Puesto(String nombre, String descripcion, Set empleados) {
+    public Ciudad(String nombre, String provincia, Set sedes, Set empleados) {
        this.nombre = nombre;
-       this.descripcion = descripcion;
-       this.empleados = empleados;
+       this.provincia = provincia;
     }
    
     public Integer getId() {
@@ -40,26 +37,19 @@ public class Puesto  implements ItemReducido {
     public void setNombre(String nombre) {
         this.nombre = nombre;
     }
-    public String getDescripcion() {
-        return this.descripcion;
+    public String getProvincia() {
+        return this.provincia;
     }
     
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
-    public Set getEmpleados() {
-        return this.empleados;
-    }
-    
-    public void setEmpleados(Set empleados) {
-        this.empleados = empleados;
+    public void setProvincia(String provincia) {
+        this.provincia = provincia;
     }
 
     @Override
     public String toString() {
         return nombre; 
     }
-    
+
     @Override
     public int getIndex() {
         return id;
@@ -69,8 +59,8 @@ public class Puesto  implements ItemReducido {
     public String getValue() {
         return toString();
     }
-
-
+    
+    
 }
 
 
